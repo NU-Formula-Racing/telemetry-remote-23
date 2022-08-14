@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.js": "/NFR21-Telemetry/static/js/main.04601ddc.chunk.js",
+    "main.js.map": "/NFR21-Telemetry/static/js/main.04601ddc.chunk.js.map",
+    "runtime-main.js": "/NFR21-Telemetry/static/js/runtime-main.5433eae3.js",
+    "runtime-main.js.map": "/NFR21-Telemetry/static/js/runtime-main.5433eae3.js.map",
+    "static/js/2.15c2fbde.chunk.js": "/NFR21-Telemetry/static/js/2.15c2fbde.chunk.js",
+    "static/js/2.15c2fbde.chunk.js.map": "/NFR21-Telemetry/static/js/2.15c2fbde.chunk.js.map",
+    "index.html": "/NFR21-Telemetry/index.html",
+    "static/js/2.15c2fbde.chunk.js.LICENSE.txt": "/NFR21-Telemetry/static/js/2.15c2fbde.chunk.js.LICENSE.txt",
+    "static/media/logo.7c344053.png": "/NFR21-Telemetry/static/media/logo.7c344053.png",
+    "static/media/pause.48f7c4bd.svg": "/NFR21-Telemetry/static/media/pause.48f7c4bd.svg",
+    "static/media/play.1e94e6ce.svg": "/NFR21-Telemetry/static/media/play.1e94e6ce.svg",
+    "static/media/scrollleft.7b05da38.svg": "/NFR21-Telemetry/static/media/scrollleft.7b05da38.svg",
+    "static/media/scrollright.8e3b1130.svg": "/NFR21-Telemetry/static/media/scrollright.8e3b1130.svg",
+    "static/media/stop.6959f135.svg": "/NFR21-Telemetry/static/media/stop.6959f135.svg",
+    "static/media/upload.78116883.svg": "/NFR21-Telemetry/static/media/upload.78116883.svg",
+    "static/media/zoomin.f628affa.svg": "/NFR21-Telemetry/static/media/zoomin.f628affa.svg",
+    "static/media/zoomout.dc533183.svg": "/NFR21-Telemetry/static/media/zoomout.dc533183.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.5433eae3.js",
+    "static/js/2.15c2fbde.chunk.js",
+    "static/js/main.04601ddc.chunk.js"
+  ]
+}
