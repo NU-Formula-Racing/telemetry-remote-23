@@ -13,7 +13,7 @@ export default function Graphs(props) {
         return (
           <Graph
             width={props.width}
-            sensorName={e.label}
+            sensorName={e}
             key={index}
             rerender={() => {props.rerender()}}
           />

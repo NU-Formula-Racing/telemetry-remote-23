@@ -86,7 +86,7 @@ export default function Graph(props) {
         let end = gd.end + 1;
         var obj = {
             time: gd.lineData.length,
-            value: Math.floor(Math.random() * 100)
+            value: Math.floor(Math.random() * 100) // get data from props
         };
         let temp = [...gd.lineData];
         temp.push(obj);

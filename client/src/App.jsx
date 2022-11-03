@@ -7,6 +7,8 @@ import Main from './components/main/Main';
 
 import { Context } from './components/shared/Context';
 
+const util = require('util');
+
 export default class App extends Component {
   static contextType = Context;
 
@@ -25,7 +27,11 @@ export default class App extends Component {
     const response = await fetch("http://localhost:3001/api");
     let results = await response.json();
     console.log(results)
-    this.setState({currentSensors: results.message});
+    // this.setState({currentSensors: results.message["test1"]});
+    var sensors = ["a","b","c"]
+    this.setState({currentSensors: sensors});
+    // prints message object in full
+    console.log(util.inspect(results.message, {showHidden: false, depth: null, colors: true}));
   }
 
   componentDidMount() {

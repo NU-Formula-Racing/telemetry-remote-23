@@ -8,7 +8,7 @@ class SensorButton extends Component {
     removeSelected(e){
         let previous = this.props.selectedSensors
         this.props.setCurrentSensors(previous.filter((element) => element.label !== e.target.value))
-        this.forceUpdate()
+        // this.forceUpdate()
     }
     state = {  }
     render() { 

@@ -14,7 +14,7 @@ export default class DataDisplay extends Component {
     this.state = {
       dispType: 'graphs',
       scrollAmt: 0,
-      whatthefuck: true,
+      whatthefuck: true, // used for rerendering
     }
 
     this.containerRef = null;
@@ -61,7 +61,7 @@ export default class DataDisplay extends Component {
   render() {
     return(
       <Container ref={this.setContainerRef} onScroll={this.handleScroll}>
-        <p>{this.props.sensors}</p>
+        <p>Current sensors: {this.props.sensors}</p>
         <NumGraphToggle
           dispType={this.state.dispType}
           setDispType={(x) => this.setState({ dispType: x })}
