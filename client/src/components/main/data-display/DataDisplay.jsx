@@ -61,12 +61,12 @@ export default class DataDisplay extends Component {
   render() {
     return(
       <Container ref={this.setContainerRef} onScroll={this.handleScroll}>
-        <p>Current sensors: {this.props.sensors}</p>
+        <p>Current sensors: {Object.keys(this.props.sensors)}</p>
         <NumGraphToggle
           dispType={this.state.dispType}
           setDispType={(x) => this.setState({ dispType: x })}
         />
-        {(this.props.sensors && this.props.sensors.length > 0)
+        {(Object.keys(this.props.sensors) && Object.keys(this.props.sensors).length > 0)
           ? this.state.dispType==='graphs'
             ? <Graphs
                 viewState={this.props.viewState}

@@ -3,9 +3,12 @@ import styled from 'styled-components';
 export default function Number(props) {
   return(
     <NumberContainer translucent={props.isDragging}>
-      <Value>{props.value}</Value>
+      {/* <Value>{props.value}</Value>
       <Label unit>{props.unit}</Label>
-      <Label>{props.label}</Label>
+      <Label>{props.label}</Label> */}
+       <Value>11</Value>
+      <Label unit>m</Label>
+      <Label>hello</Label>
     </NumberContainer>
   );
 }

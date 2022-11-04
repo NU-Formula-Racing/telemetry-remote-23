@@ -3,17 +3,19 @@ import DndList from '../../shared/DnDList';
 import VertSpacer from '../../shared/VertSpacer';
 
 export default function Graphs(props) {
+  console.log(`GGG sensors: ${props.senors}`);
   return (
     <DndList
-      items={props.sensors}
+      items={props.sensors} // need to pass in full sensors here
       vspace={7}
       setCurrentItems={(x) => props.setCurrentSensors(x)}
     >
-      {props.sensors.map((e, index) => {
+      {Object.keys(props.sensors).map((e, index) => {
         return (
           <Graph
             width={props.width}
             sensorName={e}
+            initSensorData={props.sensors[e]}
             key={index}
             rerender={() => {props.rerender()}}
           />
@@ -22,3 +24,4 @@ export default function Graphs(props) {
     </DndList>
   );
 }
+

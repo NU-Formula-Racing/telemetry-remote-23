@@ -82,8 +82,8 @@ export default function DndList(props) {
           let drop = getDrop(sector);
           
           let temp = props.items[state.startInd];
-          props.items.splice(state.startInd, 1);
-          props.items.splice(drop, 0, temp);
+          // props.items.splice(state.startInd, 1);
+          // props.items.splice(drop, 0, temp);
           props.setCurrentItems(props.items);
           handleHover(Math.floor(sector / 2));
         }

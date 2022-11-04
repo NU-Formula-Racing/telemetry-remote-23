@@ -23,7 +23,7 @@ let initData = initialise(); //data arr
 function initialise() {
     var time = -1;
     var arr = [];
-    var data_length = 1;
+    var data_length = 6;
     for (var i = 0; i < data_length; i++) {
         var obj = {
             time: ++time,
@@ -34,7 +34,24 @@ function initialise() {
     return arr;
 }
 
+function initializeFromSensorData(initSensorData) {
+    var arr = [];
+    for (var i = 0; i < initSensorData.length; i++) {
+        var obj = {
+            time: i,
+            value: initSensorData[i],
+        };
+        arr.push(obj);
+    }
+    return arr
+}
+
 export default function Graph(props) {
+    
+    initData = initializeFromSensorData(props.initSensorData);
+    // console.log(`graph init: ${props.initSensorData}`);
+    // console.log(`graph name: ${props.sensorName}`);
+
     /*****************  CONSTANTS  ****************/
     const height = 300
     const width = props.width > 500 ? props.width * 0.9 : 450

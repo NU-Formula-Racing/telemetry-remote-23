@@ -8,10 +8,15 @@ import DndList from '../shared/DnDList';
 export default class SensorDropdown extends Component {
     constructor(props){
         super(props)
+        // selectedSensors is dictionary of strings : array
+        // string is sensor name, array are time value pairs
+        let allSensors = Object.keys(props.selectedSensors)
         // all available sensor options
-        this.options = ExampleSensorsByGroups.map(e1 => (
-            e1.group === this.props.selectedGroup ? e1.sensors.map((e2, i) => ({value: e2, label: e2, id: i})) : []
-        )).flat();
+        // this.options = ExampleSensorsByGroups.map(e1 => (
+        //     e1.group === this.props.selectedGroup ? e1.sensors.map((e2, i) => ({value: e2, label: e2, id: i})) : []
+        // )).flat();
+        // this.options = allSensors.map((e, i) => ({value: e, label: e, id: i}))
+        this.options = ["Sensor A", "Sensor B"]
         // only sensors selected by user from available options
         this.selected = []
     }
@@ -32,8 +37,8 @@ export default class SensorDropdown extends Component {
     }
 
     addSelected(value){
-        if (value != null && -1 === this.props.selectedSensors.indexOf(value[0])){
-          this.props.setCurrentSensors(this.props.selectedSensors.concat(value))
+        if (value != null && -1 === Object.keys(this.props.selectedSensors).indexOf(value[0])){
+          this.props.setCurrentSensors(Object.keys(this.props.selectedSensors).concat(value))
         }
     }
 
@@ -42,7 +47,7 @@ export default class SensorDropdown extends Component {
     }
 
     removeSelected(e){
-        let previous = this.props.selectedSensors
+        let previous = Object.keys(this.props.selectedSensors)
         this.props.setCurrentSensors(previous.filter((element) => element.label !== e.target.value))
         this.forceUpdate()
     }
@@ -54,7 +59,7 @@ export default class SensorDropdown extends Component {
                 closeMenuOnSelect={false}
                 placeholder={"Select from " + this.props.selectedGroup + "..."}
                 isMulti={true}
-                options={this.options.filter((element) => (this.props.selectedSensors.every((e) => e.label !== element.label)))}
+                options={this.options.filter((element) => (Object.keys(this.props.selectedSensors).every((e) => e.label !== element.label)))}
                 value={this.props.selectedGroup}
                 onChange={(e) => this.addSelected(e)}
                 styles={{
@@ -66,18 +71,18 @@ export default class SensorDropdown extends Component {
                   }}
                 />
                 <SmallVertSpace/>
-                {this.props.selectedSensors.length !== 0 &&  <StyledButton onClick={e => this.clearSelected()}>Clear All</StyledButton>}
+                {Object.keys(this.props.selectedSensors).length !== 0 &&  <StyledButton onClick={e => this.clearSelected()}>Clear All</StyledButton>}
                 <DndList
                   vspace={5}
                   items={this.props.selectedSensors}
                   setCurrentItems={(x) => this.props.setCurrentSensors(x)}
                 >
-                  {this.props.selectedSensors.map((e, i) => (
+                  {Object.keys(this.props.selectedSensors).map((e, i) => (
                     <SensorButton 
                       key={i}
                       onClick={this.removeSelected} 
-                      label={e.label} 
-                      selectedSensors={this.props.selectedSensors} 
+                      label={e} 
+                      selectedSensors={Object.keys(this.props.selectedSensors)} 
                       setCurrentSensors={this.props.setCurrentSensors}
                     />
                   ))}

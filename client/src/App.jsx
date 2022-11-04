@@ -28,10 +28,13 @@ export default class App extends Component {
     let results = await response.json();
     console.log(results)
     // this.setState({currentSensors: results.message["test1"]});
-    var sensors = ["a","b","c"]
+    var sensors = {
+      "Left Wheel Braking": [(0, 1), (1, 2), (2, 3)],
+      "Right Wheel Braking": [(0, 10), (1, 50), (2, 80)]
+    }
     this.setState({currentSensors: sensors});
     // prints message object in full
-    console.log(util.inspect(results.message, {showHidden: false, depth: null, colors: true}));
+    // console.log(util.inspect(this.state.currentSensors, {showHidden: false, depth: null, colors: true}));
   }
 
   componentDidMount() {

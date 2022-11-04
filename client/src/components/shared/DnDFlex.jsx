@@ -96,8 +96,8 @@ export default function DndFlex(props) {
           
           // Reorder items and propagate change
           let temp = props.items[state.startInd];
-          props.items.splice(state.startInd, 1);
-          props.items.splice(drop, 0, temp);
+          // props.items.splice(state.startInd, 1);
+          // props.items.splice(drop, 0, temp);
           props.setCurrentItems(props.items);
 
           // Resets dnd start index

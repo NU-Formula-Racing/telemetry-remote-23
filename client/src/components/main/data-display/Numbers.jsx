@@ -12,10 +12,10 @@ export default function Numbers(props) {
         vSpace={12}
         itemWidth={240}
         itemHeight={190}
-        items={props.sensors}
+        items={props.sensors} // need to pass in full sensors
         setCurrentItems={(x) => props.setCurrentSensors(x)}
       >
-        {props.sensors.map((e, index) => {
+        {Object.keys(props.sensors).map((e, index) => {
           return (
             <Number
               value={e.id*30}
