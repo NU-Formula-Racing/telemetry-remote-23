@@ -4,13 +4,12 @@ import { createGlobalStyle } from 'styled-components';
 
 import Sidebar from './components/sidebar/Sidebar';
 import Main from './components/main/Main';
-
 import { Context } from './components/shared/Context';
 
-
+import socketio from "socket.io-client";
+const socket = socketio.connect("http://localhost:3001");
 
 const util = require('util');
-
 export default class App extends Component {
   static contextType = Context;
 
@@ -26,15 +25,20 @@ export default class App extends Component {
   }
 
   async getCurrentSensors() {
-    // const response = await fetch("http://localhost:3001/api");
+    await socket.emit("getSensors", (res) => {
+      console.log("getSensors res ", res)
+      this.setState({ currentSensors: res });
+    });
+
+    // const response = await fetch(`http://localhost:3001/getSensors`);
     // let results = await response.json();
-    // console.log(results)
-    // this.setState({currentSensors: results.message["test1"]});
-    var sensors = {
-      "Left Wheel Braking": [(0, 1)],
-      "Right Wheel Braking": [(0, 10)]
-    }
-    this.setState({currentSensors: sensors});
+    // console.log(`get sensor api res: ${results}`);
+    // this.setState({currentSensors: results.message["sensors"]});
+    // var sensors = {
+    //   "FRTemp": [(0, 0)],
+    //   "BLTemp": [(0, 0)],
+    // }
+    // this.setState({currentSensors: sensors});
     // prints message object in full
     // console.log(util.inspect(this.state.currentSensors, {showHidden: false, depth: null, colors: true}));
   }

@@ -278,8 +278,10 @@ export default function Graph(props) {
 
     useEffect(() => {
         socket.on("sendSensorData", (sensorData) => {
-            // console.log(`socket data: ${sensorData}`);
-            updateDataRealTime(graphData, sensorData);
+            // console.log(`sensor data ${util.inspect(sensorData, {showHidden: false, depth: null, colors: true})}`);
+            if (props.sensorName in sensorData){
+                updateDataRealTime(graphData, sensorData[props.sensorName])
+            }
             
             // console.log(`linedata print ${util.inspect(graphData, {showHidden: false, depth: null, colors: true})}`);
             // console.log(``)
