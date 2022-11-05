@@ -7,6 +7,8 @@ import Main from './components/main/Main';
 
 import { Context } from './components/shared/Context';
 
+
+
 const util = require('util');
 
 export default class App extends Component {
@@ -24,13 +26,13 @@ export default class App extends Component {
   }
 
   async getCurrentSensors() {
-    const response = await fetch("http://localhost:3001/api");
-    let results = await response.json();
-    console.log(results)
+    // const response = await fetch("http://localhost:3001/api");
+    // let results = await response.json();
+    // console.log(results)
     // this.setState({currentSensors: results.message["test1"]});
     var sensors = {
-      "Left Wheel Braking": [(0, 1), (1, 2), (2, 3)],
-      "Right Wheel Braking": [(0, 10), (1, 50), (2, 80)]
+      "Left Wheel Braking": [(0, 1)],
+      "Right Wheel Braking": [(0, 10)]
     }
     this.setState({currentSensors: sensors});
     // prints message object in full
@@ -51,6 +53,7 @@ export default class App extends Component {
     this.context.setMouseCoords(e.clientX, e.clientY);
     this.context.setDragging(false);
   }
+
 
   render() {
     return (

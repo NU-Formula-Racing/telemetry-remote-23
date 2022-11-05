@@ -17,8 +17,12 @@ import recent from '../../../assets/recent.svg';
 import { GridRows, GridColumns } from '@visx/grid';
 import { TooltipWithBounds } from '@visx/tooltip';
 
+import socketio from "socket.io-client";
+const socket = socketio.connect("http://localhost:3001");
+const util = require('util');
+
 /*****************  INIT (but its british??)  ****************/
-const n = 30; // amount of seconds to show
+const n = 100; // amount of seconds to show
 let initData = initialise(); //data arr
 function initialise() {
     var time = -1;
@@ -49,6 +53,7 @@ function initializeFromSensorData(initSensorData) {
 export default function Graph(props) {
     
     initData = initializeFromSensorData(props.initSensorData);
+    const initTime = Date.now() / 1000;
     // console.log(`graph init: ${props.initSensorData}`);
     // console.log(`graph name: ${props.sensorName}`);
 
@@ -74,6 +79,7 @@ export default function Graph(props) {
     
     // state variables
     const [graphData, setGD] = useState({lineData: initData, xScale: xScaleInit, yScale: yScaleInit, start:0, end:initData.length-1});
+    const [data, setData] = useState(initData);
     const [isScrolling, setScrolling] = useState(false)
     const wheelTimeout = useRef()
 
@@ -97,6 +103,7 @@ export default function Graph(props) {
             yScale: yscale
         }));
     }
+
     function updateData(gd, e) {
         let start = gd.start
         if (gd.end >= n) { start = gd.start + 1}
@@ -120,7 +127,38 @@ export default function Graph(props) {
                 end: end
               }));
         }
+        // console.log(`end print update ${util.inspect(graphData.end, {showHidden: false, depth: null, colors: true})}`);
         handleTooltip(e);
+    }
+
+    function updateDataRealTime(gd, val) {
+        // console.log(`linedata1 print ${util.inspect(graphData.lineData, {showHidden: false, depth: null, colors: true})}`);
+        let start = gd.start
+        if (gd.end >= n) { start = gd.start + 1}
+        let end = gd.end + 1;
+        var obj = {
+            time: val["time"] - initTime,
+            value: val["val"] // get data from props
+        };
+        let temp = gd.lineData;
+        temp.push(obj);
+        if (isScrolling){
+            setGD(prevState => ({
+                ...prevState,
+                lineData: temp,
+              }));
+        } else {
+            setGD(prevState => ({
+                ...prevState,
+                lineData: temp,
+                start: prevState.end >= n ? prevState.start + 1 : prevState.start,
+                end: prevState.end + 1
+              }));
+        }
+        // console.log(`end first print ${util.inspect(graphData.end, {showHidden: false, depth: null, colors: true})}`);
+        // handleToolTipOnSocketEvent();
+        // console.log(`temp print ${util.inspect(temp, {showHidden: false, depth: null, colors: true})}`)
+        // console.log(`end print ${util.inspect(graphData.end, {showHidden: false, depth: null, colors: true})}`);
     }
 
     /*****************  MOUSE AND KEY SHITSHOW  ****************/
@@ -229,12 +267,26 @@ export default function Graph(props) {
         document.body.addEventListener('wheel', cancelWheel, {passive:false})
         return () => document.body.removeEventListener('wheel', cancelWheel)
     }, [])
+    
     useEffect(() => {
         updateScales()
     }, [graphData.lineData, graphData.start, graphData.end])
+
     // useEffect(() => {
     //     console.log(isScrolling)
     // }, [isScrolling])
+
+    useEffect(() => {
+        socket.on("sendSensorData", (sensorData) => {
+            // console.log(`socket data: ${sensorData}`);
+            updateDataRealTime(graphData, sensorData);
+            
+            // console.log(`linedata print ${util.inspect(graphData, {showHidden: false, depth: null, colors: true})}`);
+            // console.log(``)
+            // console.log(`after sock: ${util.inspect(data, {showHidden: false, depth: null, colors: true})}`);
+            // handleToolTipOnSocketEvent();
+        });
+    }, []);
    
     /*****************  TOOLTIP BULLSHIT  ****************/
     // takes left of time
@@ -273,7 +325,7 @@ export default function Graph(props) {
             onMouseEnter={() => {props.sendIndex(); props.sendStart();}}
             onMouseLeave={() => {props.removeIndex(); props.removeStart();}}
         >
-            <button onClick={(e) => updateData(graphData,e)}>update</button> <br/>
+            {/* <button id="updatebutton" onClick={(e) => updateData(graphData,e)}>update</button> <br/> */}
             {/* navigation buttons */}
             <ButtonTray width={width}>
                 <div>

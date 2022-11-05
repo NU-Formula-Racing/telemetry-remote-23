@@ -20,6 +20,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
+    "@visx/axis": "^2.14.0",
     "@visx/group": "^2.1.0",
     "@visx/marker": "^2.1.2",
     "@visx/mock-data": "^2.1.2",
