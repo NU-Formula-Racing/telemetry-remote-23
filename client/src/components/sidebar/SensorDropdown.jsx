@@ -55,11 +55,12 @@ export default class SensorDropdown extends Component {
     render() {
         return (
             <>
-                <Select
+                {/* <Select
                 closeMenuOnSelect={false}
                 placeholder={"Select from " + this.props.selectedGroup + "..."}
                 isMulti={true}
-                options={this.options.filter((element) => (Object.keys(this.props.selectedSensors).every((e) => e.label !== element.label)))}
+                // options={this.options.filter((element) => (Object.keys(this.props.selectedSensors).every((e) => e.label !== element.label)))}
+                options={this.options.filter((element) => (Object.keys(this.props.selectedSensors).every((e) => e.label == element.label)))}
                 value={this.props.selectedGroup}
                 onChange={(e) => this.addSelected(e)}
                 styles={{
@@ -69,7 +70,7 @@ export default class SensorDropdown extends Component {
                       'font-size':'16px'
                     }),
                   }}
-                />
+                /> */}
                 <SmallVertSpace/>
                 {Object.keys(this.props.selectedSensors).length !== 0 &&  <StyledButton onClick={e => this.clearSelected()}>Clear All</StyledButton>}
                 <DndList

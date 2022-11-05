@@ -23,8 +23,9 @@ const io = socketio(server,{cors:{origin:"*"}});
 
 var prev = new Array(10).fill(50)
 
-const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED", "BL WHEEL SPEED", "BR WHEEL SPEED", "FL BRAKE TEMP", 
-"FR BRAKE TEMP", "BL BRAKE TEMP", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
+// const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED", "BL WHEEL SPEED", "BR WHEEL SPEED", "FL BRAKE TEMP", 
+// "FR BRAKE TEMP", "BL BRAKE TEMP", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
+const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED", "BL WHEEL SPEED", "BR WHEEL SPEED"];
 
 io.on('connection', (socket) => {
   console.log(`${socket.id} client connected!`);
@@ -44,7 +45,7 @@ io.on('connection', (socket) => {
   socket.on('getSensors', (callback) => {
     initValues = {}
     for (var i = 0; i < sensors.length; i++) {
-      initValues[sensors[i]] = [(0,0)];
+      initValues[sensors[i]] = [(0.01,0.01)];
     }
     callback(initValues);
   });

@@ -17,7 +17,7 @@ class SensorButton extends Component {
             onMouseEnter={() => {this.props.sendIndex()}}
             onMouseLeave={() => {this.props.removeIndex()}}
             transluscent={this.props.isDragging}
-            target={this.props.isHovering}
+            target={this.props.isHovering.toString()}
         >
             <SmallVertSpace/>
             <BasicContainer

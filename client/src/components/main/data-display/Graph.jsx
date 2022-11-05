@@ -136,9 +136,11 @@ export default function Graph(props) {
         let start = gd.start
         if (gd.end >= n) { start = gd.start + 1}
         let end = gd.end + 1;
+        let time = val.time - initTime
+        // if (time < 0) { time = 0 }
         var obj = {
-            time: val["time"] - initTime,
-            value: val["val"] // get data from props
+            time: time < 0 ? 0 : time,
+            value: val.val // get data from props
         };
         let temp = gd.lineData;
         temp.push(obj);
@@ -156,7 +158,7 @@ export default function Graph(props) {
               }));
         }
         // console.log(`end first print ${util.inspect(graphData.end, {showHidden: false, depth: null, colors: true})}`);
-        // handleToolTipOnSocketEvent();
+        // handleTooltipOnSocketEvent();
         // console.log(`temp print ${util.inspect(temp, {showHidden: false, depth: null, colors: true})}`)
         // console.log(`end print ${util.inspect(graphData.end, {showHidden: false, depth: null, colors: true})}`);
     }
@@ -282,11 +284,6 @@ export default function Graph(props) {
             if (props.sensorName in sensorData){
                 updateDataRealTime(graphData, sensorData[props.sensorName])
             }
-            
-            // console.log(`linedata print ${util.inspect(graphData, {showHidden: false, depth: null, colors: true})}`);
-            // console.log(``)
-            // console.log(`after sock: ${util.inspect(data, {showHidden: false, depth: null, colors: true})}`);
-            // handleToolTipOnSocketEvent();
         });
     }, []);
    
@@ -320,6 +317,7 @@ export default function Graph(props) {
         },
         [showTooltip, graphData.yScale, graphData.xScale],
       );
+
 
   return (
         <GraphContainer
