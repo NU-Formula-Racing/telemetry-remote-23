@@ -28,7 +28,10 @@ export default class App extends Component {
     await socket.emit("getSensors", (res) => {
       console.log("getSensors res ", res)
       this.setState({ currentSensors: res });
+      // socket.disconnect();
     });
+
+    // socket.disconnect();
 
     // const response = await fetch(`http://localhost:3001/getSensors`);
     // let results = await response.json();
@@ -43,9 +46,9 @@ export default class App extends Component {
     // console.log(util.inspect(this.state.currentSensors, {showHidden: false, depth: null, colors: true}));
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     console.log("comp did mount")
-    this.getCurrentSensors();
+    await this.getCurrentSensors();
   }
 
   handleMouseDown = (e) => {

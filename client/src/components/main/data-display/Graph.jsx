@@ -18,8 +18,10 @@ import { GridRows, GridColumns } from '@visx/grid';
 import { TooltipWithBounds } from '@visx/tooltip';
 
 import socketio from "socket.io-client";
-const socket = socketio.connect("http://localhost:3001");
 const util = require('util');
+
+const socket = socketio.connect("http://localhost:3001");
+// socket.emit("startSending");
 
 /*****************  INIT (but its british??)  ****************/
 const n = 100; // amount of seconds to show
@@ -51,6 +53,8 @@ function initializeFromSensorData(initSensorData) {
 }
 
 export default function Graph(props) {
+
+    // socket.emit("startSending");
     
     initData = initializeFromSensorData(props.initSensorData);
     const initTime = Date.now() / 1000;
@@ -132,7 +136,7 @@ export default function Graph(props) {
     }
 
     function updateDataRealTime(gd, val) {
-        // console.log(`linedata1 print ${util.inspect(graphData.lineData, {showHidden: false, depth: null, colors: true})}`);
+        console.log(`${props.sensorName}} ${util.inspect(graphData.lineData, {showHidden: false, depth: null, colors: true})}`);
         let start = gd.start
         if (gd.end >= n) { start = gd.start + 1}
         let end = gd.end + 1;
