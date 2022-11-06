@@ -10,9 +10,15 @@ const util = require('util');
 const {SerialPort} = require("serialport");
 
 // define serial port
+// List of all possible ports as far as we know:
+// 1. /dev/tty.usbmodem115442301
 const laptopPort = new SerialPort({
-  path: '/dev/tty.Bluetooth-Incoming-Port', // TODO: change this to your serial port path
-  baudRate: 9600,
+  path: '/dev/tty.usbmodem115442301',
+  baudRate: 9600
+  }, function (err) { // error cheecking
+    if (err) {
+      return console.log('Error: ', err.message)
+    }
 });
 
 // number of sensors
@@ -25,6 +31,8 @@ const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 // server constants
 const app = express();
 const PORT = process.env.PORT || 3001;
+const value_types = ["float", "float", "float", "float", "float", "float", "float", "float", "int", "int"];
+const value_lengths = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
 
 const corsOptions = {
   origin: "http://localhost:3000", 
@@ -34,6 +42,10 @@ const corsOptions = {
 app.use(cors(corsOptions)) // Use this after the variable declaration
 
 const origin = Date.now() / 1000;
+
+// Miscellaneous
+const scale = 10;
+const bias = -40;
 
 //-----------------socket.io-----------------
 
@@ -80,7 +92,10 @@ io.on('connection', (socket) => {
   });
 
   // READ INCOMING SERIAL DATA FROM TEENSY
-  laptopPort.on("data", streamData(data, socket));
+  laptopPort.on('data', function (data) {
+    Console.log(data);
+    streamData(data, socket)
+  });
 
   streamData([], socket)
 
@@ -107,14 +122,49 @@ function dataSlicing(data){
   let dataObj = {};
   const curTime = Date.now() / 1000;
 
-  for(let i = 0; i < numSensors; i++){
-    dataObj[sensors[i]] = {
-      'val': data[i],
-      'time': curTime
-    };
+  // Data value list, information is listed as below
+  // Index 0: FL WHEEL SPEED, float
+  // Index 1: FR WHEEL SPEED, float
+  // Index 2: BL WHEEL SPEED, float
+  // Index 3: BR WHEEL SPEED, float
+  // Index 4: FL BRAKE TEMP, float
+  // Index 5: FR BRAKE TEMP, float
+  // Index 6: BL BRAKE TEMP, float
+  // Index 7: BR BRAKE TEMP, float
+  // Index 8: F BRAKE PRESSURE, int
+  // Index 9: R BRAKE PRESSURE, int
+
+  data_ind = 0; // index for the data array
+  item_ind = 0; // index for the reference arrays
+
+  while (data_ind < sensorByteLength) {
+    let value = bin2string(data.slice(data_ind, data_ind + value_lengths[item_ind]));
+    value = processData(value, value_types[item_ind]);
+    dataObj[sensors[item_ind]] = {
+      'val': value,
+      'time': curTime,
+    }
+    data_ind += value_lengths[item_ind];
+    item_ind += 1;
   }
   
   return dataObj;
+}
+
+function processData(value, type){
+  // value -> the data in bytes
+  // type -> type of data, int or float
+
+  if (type == "int"){
+    // process to int
+    return parseInt(value, 2);
+  } else if (type == "float"){
+    // process to float
+    return parseFloat(value)/scale + bias;
+  }
+
+  return value
+
 }
 
 
@@ -172,3 +222,11 @@ function streamDataDynamoDB() {
 server.listen(PORT, () => {
   console.log(`server listening on port ${PORT}`);
 });
+
+function bin2string(array){
+	var result = "";
+	for(var i = 0; i < array.length; ++i){
+		result+= (String.fromCharCode(array[i]));
+	}
+	return result;
+}
