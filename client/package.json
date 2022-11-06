@@ -26,6 +26,7 @@
     "@visx/mock-data": "^2.1.2",
     "@visx/scale": "^2.1.2",
     "@visx/shape": "^2.1.2",
+    "@visx/tooltip": "^2.16.0",
     "@visx/visx": "^2.2.2",
     "concurrently": "^6.3.0",
     "electron-builder": "^23.5.0",

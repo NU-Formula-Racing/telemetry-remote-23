@@ -10,8 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.204.0",
+    "aws-sdk": "^2.1248.0",
     "cors": "^2.8.5",
     "express": "^4.18.1",
+    "serialport": "^10.4.0",
     "socket.io": "^4.5.3"
   }
 }

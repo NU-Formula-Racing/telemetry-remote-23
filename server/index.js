@@ -1,3 +1,4 @@
+// ****************************** CONSTANT DEFINITIONS ***********************************
 // server/index.js
 const express = require("express");
 const http = require("http");
@@ -5,6 +6,23 @@ const socketio = require('socket.io');
 const cors = require("cors");
 const util = require('util');
 
+// serial ports
+const {SerialPort} = require("serialport");
+
+// define serial port
+const laptopPort = new SerialPort({
+  path: '/dev/tty.Bluetooth-Incoming-Port', // TODO: change this to your serial port path
+  baudRate: 9600,
+});
+
+// number of sensors
+const numSensors = 10;
+const sensorByteLength = numSensors*2;
+
+// dynamoDB constants setup
+const { DynamoDB } = require("@aws-sdk/client-dynamodb");
+
+// server constants
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -29,41 +47,29 @@ var prev = new Array(10).fill(50)
 // "FR BRAKE TEMP", "BL BRAKE TEMP", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
 const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED"];
 
+
+
+
+
+
+
+// ****************************** SERIAL PORT CODE ***********************************
+
 // used for sending data to aws DynamoDB
 var sensorDataQueue = {};
 sensors.forEach(sensor => { sensorDataQueue[sensor] = [] });
 
-// socket connecting to 
+// Check if data reading in from port is erroring
+// laptopPort.open(function(err) {
+//   if (err) {
+//     return console.log('Error opening port: ', err.message);
+//   }
+// })
+
+// When socket connects, send data to client
 io.on('connection', (socket) => {
   console.log(`${socket.id} client connected!`);
-  var count = 1;
-  setInterval(() => {
-    dataObj = {}
-    const curTime = Date.now() / 1000;
 
-    for (var i = 0; i < sensors.length; i++) {
-      const curVal = getSmoothNumber(prev[i]);
-      const itemObj = { 
-        L : [
-          { S: (curTime - origin).toString() },
-          { N: curVal.toString() }
-        ]};
-      sensorDataQueue[sensors[i]].push(itemObj);
-
-      dataObj[sensors[i]] = {
-        'val': curVal,
-        'time': curTime
-      };
-      prev[i] = curVal;
-    }
-    count = count + 1;
-    // console.log("ping");
-    // sends data to client on sendSensorData event
-    socket.emit('sendSensorData',  dataObj);
-    // console.log(`PREPARE QUE ${util.inspect(sensorDataQueue, {showHidden: false, depth: null, colors: true})}`);
-    // console.log(`PREPARE DAT ${util.inspect(dataObj, {showHidden: false, depth: null, colors: true})}`);
-  }, 0.5 * 1000);
-  
   // send list of sensor names and initial values to client
   socket.on('getSensors', (callback) => {
     initValues = {}
@@ -73,11 +79,50 @@ io.on('connection', (socket) => {
     callback(initValues);
   });
 
-  socket.on('disconnect', () => {
+  // READ INCOMING SERIAL DATA FROM TEENSY
+  laptopPort.on("data", streamData(data, socket));
+
+  streamData([], socket)
+
+  // disconnecting the socket
+  socket.on('disconnect', () => {å
     console.log('client disconnected');
   });
 });
 
+// Helper function to stream data into the socket
+function streamData(data, socket) {
+  console.log("Current data input: ", data.toString());
+
+  // Create data object dictionary
+  let dataObj = dataSlicing(data);
+
+  // send data to client on sendSensorData event
+  socket.emit('sendSensorData',  dataObj);
+}
+
+
+// Slicing the data into 2 bytes each, might need to change
+function dataSlicing(data){
+  let dataObj = {};
+  const curTime = Date.now() / 1000;
+
+  for(let i = 0; i < numSensors; i++){
+    dataObj[sensors[i]] = {
+      'val': data[i],
+      'time': curTime
+    };
+  }
+  
+  return dataObj;
+}
+
+
+
+
+// ****************************** DYNAMODB CODE ***********************************
+
+// Write data to DynamoDB, faked right now
 setInterval(() => {
   var dynamoDBJson = {};
   // set the necessary headers for the response
@@ -104,7 +149,6 @@ setInterval(() => {
   console.log(`SEND TO DYNAMO ${util.inspect(dynamoDBJson, {showHidden: false, depth: null, colors: true})}`);
 }, 1 * 1000)
 
-
 function getSmoothNumber(n) {
   const scale = 5;
   let difference = Math.floor(Math.random() * scale) - Math.floor(Math.random() * scale);
@@ -117,8 +161,14 @@ function getSmoothNumber(n) {
   return n + difference;
 }
 
+
+// REAL TIME STREAMING DATA INTO DYNAMODB
+function streamDataDynamoDB() {
+}
+
+
+// ****************************** MISC ***********************************
+
 server.listen(PORT, () => {
   console.log(`server listening on port ${PORT}`);
 });
-
-
