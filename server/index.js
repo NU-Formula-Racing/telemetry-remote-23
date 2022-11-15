@@ -112,8 +112,6 @@ io.on('connection', (socket) => {
     streamData(data, socket);
   });
 
-  streamData([], socket)
-
   // disconnecting the socket
   socket.on('disconnect', () => {å
     console.log('client disconnected');
