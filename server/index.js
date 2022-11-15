@@ -5,7 +5,7 @@ const http = require("http");
 const socketio = require('socket.io');
 const cors = require("cors");
 const util = require('util');
-const dynamoDB = require('./dynamodb.js');
+const dynamoDBHelper = require('./dynamodb.js');
 
 // serial ports
 const {SerialPort} = require("serialport");
@@ -79,12 +79,6 @@ const sensors = ["FL_WHEEL_SPEED", "FR_WHEEL_SPEED", "BL_WHEEL_SPEED", "BR_WHEEL
 "FR_BRAKE_TEMP", "BL_BRAKE_TEMP", "BR_BRAKE_TEMP", "F_BRAKE_PRESSURE", "R_BRAKE_PRESSURE"];
 
 
-let temp = {}
-for (let i = 0; i < sensors.length; i++){
-  temp[sensors[i]] = i + 10;
-}
-
-
 // ****************************** SERIAL PORT CODE ***********************************
 
 // used for sending data to aws DynamoDB
@@ -135,8 +129,12 @@ function streamData(data, socket) {
   console.log("Current data input: ", data.toString());
 
   // Create data object dictionary
+  // dataObj: maps sensor data to list of data
+  // list of data: array of dict with keys [time, val]
   let dataObj = dataSlicing(data);
   console.log("Current to client object: ", dataObj);
+
+  dynamoDBHelper.sendDataToDynamoDB(dataObj);
 
   // send data to client on sendSensorData event
   socket.emit('sendSensorData',  dataObj);
@@ -178,7 +176,7 @@ function dataSlicing(data){
     value = processData(value, info_ind);
     dataObj[sensors[info_ind]] = {
       'val': value,
-      'time': curTime,
+      'time': curTime - START_TIME,
     }
 
     // Iteratior increment
@@ -256,7 +254,7 @@ function processData(value, info_ind){
 // }
 
 
-dynamoDB.sendDataToDynamoDB(temp);
+dynamoDBHelper.sendDataToDynamoDB(temp);
 
 
 // ****************************** MISC ***********************************
