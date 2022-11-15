@@ -32,9 +32,9 @@ const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 // server constants
 const app = express();
 const PORT = process.env.PORT || 3001;
-const value_types = ["float", "float", "float", "float", "float", "float", "float", "float", "int", "int", "int"];
-const bias_bool_array = [false, true, false, true, false, true, false, true, true, true, "int"];
-const value_lengths = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
+const VALUE_TYPES = ["float", "float", "float", "float", "float", "float", "float", "float", "int", "int", "int"];
+const BIAS_BOOL_ARRAY = [false, true, false, true, false, true, false, true, true, true, "int"];
+const VALUE_LENGTHS = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
 
 const corsOptions = {
   // origin: "http://localhost:3000", 
@@ -44,7 +44,7 @@ const corsOptions = {
 }
 app.use(cors(corsOptions)) // Use this after the variable declaration
 
-const origin = Date.now() / 1000;
+const START_TIME = Date.now() / 1000;
 
 // Miscellaneous - Real
 // const scale = 10;
@@ -83,8 +83,6 @@ let temp = {}
 for (let i = 0; i < sensors.length; i++){
   temp[sensors[i]] = i + 10;
 }
-
-
 
 
 // ****************************** SERIAL PORT CODE ***********************************
@@ -184,7 +182,7 @@ function dataSlicing(data){
     }
 
     // Iteratior increment
-    i += value_lengths[info_ind] // increment with current data value length
+    i += VALUE_LENGTHS[info_ind] // increment with current data value length
     info_ind += 1;
   }
   
@@ -195,8 +193,8 @@ function dataSlicing(data){
 function processData(value, info_ind){
   // value -> the data in bytes
   // type -> type of data, int or float
-  let type = value_types[info_ind];
-  let bias_bool = bias_bool_array[info_ind];
+  let type = VALUE_TYPES[info_ind];
+  let bias_bool = BIAS_BOOL_ARRAY[info_ind];
 
   if (type == "int"){
     // process to int

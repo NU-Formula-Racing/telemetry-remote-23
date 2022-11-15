@@ -5,8 +5,8 @@ function sendDataToDynamoDB(dataDict){
     let awsConfig = {
         "region": "us-east-2",
         "endpoint": "http://dynamodb.us-east-2.amazonaws.com",
-        "accessKeyId": "***REMOVED***",
-        "secretAccessKey":"***REMOVED***"
+        "accessKeyId": "nothing",
+        "secretAccessKey":"nothing"
     }
     AWS.config.update(awsConfig);
 
@@ -22,13 +22,13 @@ function sendDataToDynamoDB(dataDict){
     };
 
     // // Call DynamoDB to add the item to the table
-    // ddb.putItem(params, function(err, data) {
-    // if (err) {
-    //     console.log("Error", err);
-    // } else {
-    //     console.log("Success", data);
-    // }
-    // });
+    ddb.putItem(params, function(err, data) {
+    if (err) {
+        console.log("Error", err);
+    } else {
+        console.log("Success", data);
+    }
+    });
 
     console.log(jsonItem);
 }
