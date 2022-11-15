@@ -5,6 +5,7 @@ const http = require("http");
 const socketio = require('socket.io');
 const cors = require("cors");
 const util = require('util');
+const dynamoDB = require('./dynamodb.js');
 
 // serial ports
 const {SerialPort} = require("serialport");
@@ -37,7 +38,7 @@ const value_lengths = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
 
 const corsOptions = {
   // origin: "http://localhost:3000", 
-  origin: "http://localhost:59625",
+  origin: "http://localhost:63613",
   credentials:true,            //access-control-allow-credentials:true
   // allowedHeaders: ["header"],
 }
@@ -46,12 +47,12 @@ app.use(cors(corsOptions)) // Use this after the variable declaration
 const origin = Date.now() / 1000;
 
 // Miscellaneous - Real
-const scale = 10;
-const bias = -40;
+// const scale = 10;
+// const bias = -40;
 
 // Miscellaneous - Testing
-// const scale = 1;
-// const bias = 0;
+const scale = 0.1;
+const bias = 0;
 
 
 // Notes:
@@ -71,11 +72,17 @@ var prev = new Array(10).fill(50)
 // "FR BRAKE TEMP", "BL BRAKE TEMP", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
 // const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED"];
 
-const sensors = ["FL WHEEL SPEED", "FL BRAKE TEMP", "FR WHEEL SPEED", "FR BRAKE TEMP", "BL WHEEL SPEED", "BL BRAKE TEMP", 
-"BR WHEEL SPEED", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
+// const sensors = ["FL WHEEL SPEED", "FL BRAKE TEMP", "FR WHEEL SPEED", "FR BRAKE TEMP", "BL WHEEL SPEED", "BL BRAKE TEMP", 
+// "BR WHEEL SPEED", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
+
+const sensors = ["FL_WHEEL_SPEED", "FR_WHEEL_SPEED", "BL_WHEEL_SPEED", "BR_WHEEL_SPEED", "FL_BRAKE_TEMP",
+"FR_BRAKE_TEMP", "BL_BRAKE_TEMP", "BR_BRAKE_TEMP", "F_BRAKE_PRESSURE", "R_BRAKE_PRESSURE"];
 
 
-
+let temp = {}
+for (let i = 0; i < sensors.length; i++){
+  temp[sensors[i]] = i + 10;
+}
 
 
 
@@ -109,7 +116,7 @@ io.on('connection', (socket) => {
   // READ INCOMING SERIAL DATA FROM TEENSY
   laptopPort.on('data', function (data) {
     console.log(data);
-    streamData(data, socket);
+    let pocessedData = streamData(data, socket);
   });
 
   // disconnecting the socket
@@ -135,6 +142,8 @@ function streamData(data, socket) {
 
   // send data to client on sendSensorData event
   socket.emit('sendSensorData',  dataObj);
+
+  return dataObj;
 }
 
 
@@ -196,9 +205,9 @@ function processData(value, info_ind){
     // process to float
     // see if data needs bias attached
     if (bias_bool){
-      return parseInt(value, 2)/scale + bias;
+      return parseInt(value, 2)*scale + bias;
     }{
-      return parseInt(value, 2)/scale;
+      return parseInt(value, 2)*scale;
     }
   }
 
@@ -249,9 +258,7 @@ function processData(value, info_ind){
 // }
 
 
-// REAL TIME STREAMING DATA INTO DYNAMODB
-function streamDataDynamoDB() {
-}
+dynamoDB.sendDataToDynamoDB(temp);
 
 
 // ****************************** MISC ***********************************
