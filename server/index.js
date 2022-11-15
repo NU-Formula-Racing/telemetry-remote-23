@@ -31,11 +31,13 @@ const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 // server constants
 const app = express();
 const PORT = process.env.PORT || 3001;
-const value_types = ["float", "float", "float", "float", "float", "float", "float", "float", "int", "int"];
-const value_lengths = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
+const value_types = ["float", "float", "float", "float", "float", "float", "float", "float", "int", "int", "int"];
+const bias_bool_array = [false, true, false, true, false, true, false, true, true, true, "int"];
+const value_lengths = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
 
 const corsOptions = {
-  origin: "http://localhost:3000", 
+  // origin: "http://localhost:3000", 
+  origin: "http://localhost:59625",
   credentials:true,            //access-control-allow-credentials:true
   // allowedHeaders: ["header"],
 }
@@ -43,9 +45,18 @@ app.use(cors(corsOptions)) // Use this after the variable declaration
 
 const origin = Date.now() / 1000;
 
-// Miscellaneous
+// Miscellaneous - Real
 const scale = 10;
 const bias = -40;
+
+// Miscellaneous - Testing
+// const scale = 1;
+// const bias = 0;
+
+
+// Notes:
+// 1. First 8 shorts -> floats
+// 2. Next 3 shorts -> integers
 
 //-----------------socket.io-----------------
 
@@ -55,9 +66,13 @@ const io = socketio(server,{cors:{origin:"*"}});
 
 var prev = new Array(10).fill(50)
 
+// Keys:
 // const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED", "BL WHEEL SPEED", "BR WHEEL SPEED", "FL BRAKE TEMP", 
 // "FR BRAKE TEMP", "BL BRAKE TEMP", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
-const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED"];
+// const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED"];
+
+const sensors = ["FL WHEEL SPEED", "FL BRAKE TEMP", "FR WHEEL SPEED", "FR BRAKE TEMP", "BL WHEEL SPEED", "BL BRAKE TEMP", 
+"BR WHEEL SPEED", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
 
 
 
@@ -93,8 +108,8 @@ io.on('connection', (socket) => {
 
   // READ INCOMING SERIAL DATA FROM TEENSY
   laptopPort.on('data', function (data) {
-    Console.log(data);
-    streamData(data, socket)
+    console.log(data);
+    streamData(data, socket);
   });
 
   streamData([], socket)
@@ -105,12 +120,20 @@ io.on('connection', (socket) => {
   });
 });
 
+
 // Helper function to stream data into the socket
 function streamData(data, socket) {
+
+  // data length check
+  if (data.length <= 1){
+    return;
+  }
+
   console.log("Current data input: ", data.toString());
 
   // Create data object dictionary
   let dataObj = dataSlicing(data);
+  console.log("Current to client object: ", dataObj);
 
   // send data to client on sendSensorData event
   socket.emit('sendSensorData',  dataObj);
@@ -134,82 +157,98 @@ function dataSlicing(data){
   // Index 8: F BRAKE PRESSURE, int
   // Index 9: R BRAKE PRESSURE, int
 
-  data_ind = 0; // index for the data array
-  item_ind = 0; // index for the reference arrays
+  info_ind = 0; // index for the miscellaneous information arrays
+  i = 1; // data index
 
-  while (data_ind < sensorByteLength) {
-    let value = bin2string(data.slice(data_ind, data_ind + value_lengths[item_ind]));
-    value = processData(value, value_types[item_ind]);
-    dataObj[sensors[item_ind]] = {
+  // while loop for getting data
+  while (i < data.length){
+
+    // when we reach the last bit
+    // The termination bit apparently
+    if (i == data.length - 1){
+      break;
+    }
+
+    let value = data[i].toString(2) + data[i-1].toString(2); // little endian
+    value = processData(value, info_ind);
+    dataObj[sensors[info_ind]] = {
       'val': value,
       'time': curTime,
     }
-    data_ind += value_lengths[item_ind];
-    item_ind += 1;
+
+    // Iteratior increment
+    i += value_lengths[info_ind] // increment with current data value length
+    info_ind += 1;
   }
   
   return dataObj;
 }
 
-function processData(value, type){
+
+function processData(value, info_ind){
   // value -> the data in bytes
   // type -> type of data, int or float
+  let type = value_types[info_ind];
+  let bias_bool = bias_bool_array[info_ind];
 
   if (type == "int"){
     // process to int
     return parseInt(value, 2);
   } else if (type == "float"){
     // process to float
-    return parseFloat(value)/scale + bias;
+    // see if data needs bias attached
+    if (bias_bool){
+      return parseInt(value, 2)/scale + bias;
+    }{
+      return parseInt(value, 2)/scale;
+    }
   }
 
   return value
-
 }
-
 
 
 
 // ****************************** DYNAMODB CODE ***********************************
 
-// Write data to DynamoDB, faked right now
-setInterval(() => {
-  var dynamoDBJson = {};
-  // set the necessary headers for the response
-  sensors.forEach(sensor => { dynamoDBJson[sensor] = {L : []}; });
-  var today = new Date();
-  var dd = String(today.getDate()).padStart(2, '0');
-  var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-  var yyyy = today.getFullYear();
-  today = yyyy + ',' + mm + ',' + dd;
-  dynamoDBJson["Date"] = { S: today };
-  // console.log(`len: ${Object.keys(sensorDataQueue).length}`);
-  const curTime = Date.now() / 1000;
-  for (var i = 0; i < sensors.length; i++) {
-    // pop data from sensorDataQueue and add to dynamoDBJson if time is before curTime
-    while (sensorDataQueue[sensors[i]].length > 1 && Number(sensorDataQueue[sensors[i]][0].L[0].S) < curTime - origin) {
-      dynamoDBJson[sensors[i]].L.push(sensorDataQueue[sensors[i]].shift());
-      sensorDataQueue[sensors[i]].shift();
-    }
-  }
+// // Write data to DynamoDB, faked right now
+// setInterval(() => {
+//   var dynamoDBJson = {};
+//   // set the necessary headers for the response
+//   sensors.forEach(sensor => { dynamoDBJson[sensor] = {L : []}; });
+//   var today = new Date();
+//   var dd = String(today.getDate()).padStart(2, '0');
+//   var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
+//   var yyyy = today.getFullYear();
+//   today = yyyy + ',' + mm + ',' + dd;
+//   dynamoDBJson["Date"] = { S: today };
+//   // console.log(`len: ${Object.keys(sensorDataQueue).length}`);
+//   const curTime = Date.now() / 1000;
+//   for (var i = 0; i < sensors.length; i++) {
+//     // pop data from sensorDataQueue and add to dynamoDBJson if time is before curTime
+//     while (sensorDataQueue[sensors[i]].length > 1 && Number(sensorDataQueue[sensors[i]][0].L[0].S) < curTime - origin) {
+//       dynamoDBJson[sensors[i]].L.push(sensorDataQueue[sensors[i]].shift());
+//       sensorDataQueue[sensors[i]].shift();
+//     }
+//   }
 
-  dynamoDBJson["id"] = { S: "123456" };
-  dynamoDBJson["Session Name"] = { S: "Test Session" };
+//   dynamoDBJson["id"] = { S: "123456" };
+//   dynamoDBJson["Session Name"] = { S: "Test Session" };
 
-  console.log(`SEND TO DYNAMO ${util.inspect(dynamoDBJson, {showHidden: false, depth: null, colors: true})}`);
-}, 1 * 1000)
+//   console.log(`SEND TO DYNAMO ${util.inspect(dynamoDBJson, {showHidden: false, depth: null, colors: true})}`);
+// }, 1 * 1000)
 
-function getSmoothNumber(n) {
-  const scale = 5;
-  let difference = Math.floor(Math.random() * scale) - Math.floor(Math.random() * scale);
-  if (n + difference < 0) {
-    difference = scale * 2;
-  }
-  if (n + difference > 100) {
-    difference = - scale * 2;
-  }
-  return n + difference;
-}
+// function getSmoothNumber(n) {
+//   const scale = 5;
+//   let difference = Math.floor(Math.random() * scale) - Math.floor(Math.random() * scale);
+//   if (n + difference < 0) {
+//     difference = scale * 2;
+//   }
+//   if (n + difference > 100) {
+//     difference = - scale * 2;
+//   }
+//   return n + difference;
+// }
 
 
 // REAL TIME STREAMING DATA INTO DYNAMODB
@@ -222,11 +261,3 @@ function streamDataDynamoDB() {
 server.listen(PORT, () => {
   console.log(`server listening on port ${PORT}`);
 });
-
-function bin2string(array){
-	var result = "";
-	for(var i = 0; i < array.length; ++i){
-		result+= (String.fromCharCode(array[i]));
-	}
-	return result;
-}
