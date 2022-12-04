@@ -1,14 +1,43 @@
-// ****************************** CONSTANT DEFINITIONS ***********************************
-// server/index.js
+/***
+TODO:
+- Clean up index.js 
+  - pull out client, usb port, dynamodb code
+  - make it modular for easier testing
+
+- Make a new node.js called factory to generate fake data
+  - will have failure and will come in at different period
+
+- Use charts.js to display data
+  - revamp the entire UI
+
+- Features:
+  - automatically rescaling on new data
+  - easy scrolling and zooming
+  - can move and display graphs easily
+  - overlay graphs
+  - display number and names clearly
+  - make display longer and can stack more
+  - have different tabs with different views
+
+- DynamoDB
+  - locally store all data in memory
+  - send data to dynamodb on interval directly
+
+- Secondary:
+  - add separate live data view with only numbers
+  - try to make it look like images online
+***/
+
 const express = require("express");
 const http = require("http");
 const socketio = require('socket.io');
 const cors = require("cors");
 const util = require('util');
-const dynamoDBHelper = require('./dynamodb.js');
+const { SerialPort } = require("serialport");
+const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 
-// serial ports
-const {SerialPort} = require("serialport");
+const dynamoDBHelper = require('./dynamodb.js');
+const C = require('./constants.js');
 
 // define serial port
 // List of all possible ports as far as we know:
@@ -16,33 +45,25 @@ const {SerialPort} = require("serialport");
 const laptopPort = new SerialPort({
   path: '/dev/tty.usbmodem115442301',
   baudRate: 9600
-  }, function (err) { // error cheecking
+  }, function (err) { 
     if (err) {
-      return console.log('Error: ', err.message)
+      return console.log('SerialPort Error on create: ', err.message)
     }
 });
 
-// number of sensors
-const numSensors = 10;
-const sensorByteLength = numSensors*2;
-
-// dynamoDB constants setup
-const { DynamoDB } = require("@aws-sdk/client-dynamodb");
-
-// server constants
+// configure node.js server
 const app = express();
 const PORT = process.env.PORT || 3001;
-const VALUE_TYPES = ["float", "float", "float", "float", "float", "float", "float", "float", "int", "int", "int"];
-const BIAS_BOOL_ARRAY = [false, true, false, true, false, true, false, true, true, true, "int"];
-const VALUE_LENGTHS = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2];
-
 const corsOptions = {
-  // origin: "http://localhost:3000", 
   origin: "http://localhost:63613",
   credentials:true,            //access-control-allow-credentials:true
   // allowedHeaders: ["header"],
 }
-app.use(cors(corsOptions)) // Use this after the variable declaration
+app.use(cors(corsOptions))
+
+// build websocket server
+const server = http.createServer(app);
+const io = socketio(server,{cors:{origin:"*"}});
 
 const START_TIME = Date.now() / 1000;
 
@@ -50,40 +71,10 @@ const START_TIME = Date.now() / 1000;
 // const scale = 10;
 // const bias = -40;
 
-// Miscellaneous - Testing
-const scale = 0.1;
-const bias = 0;
-
 
 // Notes:
 // 1. First 8 shorts -> floats
 // 2. Next 3 shorts -> integers
-
-//-----------------socket.io-----------------
-
-const server = http.createServer(app);
-
-const io = socketio(server,{cors:{origin:"*"}});
-
-var prev = new Array(10).fill(50)
-
-// Keys:
-// const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED", "BL WHEEL SPEED", "BR WHEEL SPEED", "FL BRAKE TEMP", 
-// "FR BRAKE TEMP", "BL BRAKE TEMP", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
-// const sensors = ["FL WHEEL SPEED", "FR WHEEL SPEED"];
-
-// const sensors = ["FL WHEEL SPEED", "FL BRAKE TEMP", "FR WHEEL SPEED", "FR BRAKE TEMP", "BL WHEEL SPEED", "BL BRAKE TEMP", 
-// "BR WHEEL SPEED", "BR BRAKE TEMP", "F BRAKE PRESSURE", "R BRAKE PRESSURE"];
-
-const sensors = ["FL_WHEEL_SPEED", "FR_WHEEL_SPEED", "BL_WHEEL_SPEED", "BR_WHEEL_SPEED", "FL_BRAKE_TEMP",
-"FR_BRAKE_TEMP", "BL_BRAKE_TEMP", "BR_BRAKE_TEMP", "F_BRAKE_PRESSURE", "R_BRAKE_PRESSURE"];
-
-
-// ****************************** SERIAL PORT CODE ***********************************
-
-// used for sending data to aws DynamoDB
-var sensorDataQueue = {};
-sensors.forEach(sensor => { sensorDataQueue[sensor] = [] });
 
 // Check if data reading in from port is erroring
 // laptopPort.open(function(err) {
@@ -92,73 +83,55 @@ sensors.forEach(sensor => { sensorDataQueue[sensor] = [] });
 //   }
 // })
 
-// When socket connects, send data to client
+// ****************************** SOCKET IO LISTENER ***************************************
 io.on('connection', (socket) => {
   console.log(`${socket.id} client connected!`);
 
   // send list of sensor names and initial values to client
   socket.on('getSensors', (callback) => {
     initValues = {}
-    for (var i = 0; i < sensors.length; i++) {
-      initValues[sensors[i]] = [(0.01,0.01)];
+    for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
+      initValues[C.SENSORS[i].name] = [(0.01,0.01)];
     }
     callback(initValues);
   });
 
-  // READ INCOMING SERIAL DATA FROM TEENSY
+  // read data from serial port and send to client
   laptopPort.on('data', function (data) {
     console.log(data);
-    let pocessedData = streamData(data, socket);
+    emitData(data, socket);
   });
 
-  // disconnecting the socket
   socket.on('disconnect', () => {å
     console.log('client disconnected');
   });
 });
 
-
-// Helper function to stream data into the socket
-function streamData(data, socket) {
-
-  // data length check
+// ****************************** DATA PROCESSING ***************************************
+// Helper to proces and emit data into the socket
+function emitData(data, socket) {
   if (data.length <= 1){
     return;
   }
+  console.log("Raw data input: ", data.toString());
 
-  console.log("Current data input: ", data.toString());
-
-  // Create data object dictionary
-  // dataObj: maps sensor data to list of data
-  // list of data: array of dict with keys [time, val]
+  // dataObj (dictionary): sensorName -> dataList
+  // dataList (array): [...,[time, val],...]
   let dataObj = dataSlicing(data);
   console.log("Current to client object: ", dataObj);
 
+  // TODO: need to change this to use persistent data
   dynamoDBHelper.sendDataToDynamoDB(dataObj);
 
   // send data to client on sendSensorData event
   socket.emit('sendSensorData',  dataObj);
-
-  return dataObj;
 }
 
-
-// Slicing the data into 2 bytes each, might need to change
+// preprocess raw data from bytes array into dataobj dictionary
 function dataSlicing(data){
   let dataObj = {};
+  // FIXME: should use timestamp from the data instead
   const curTime = Date.now() / 1000;
-
-  // Data value list, information is listed as below
-  // Index 0: FL WHEEL SPEED, float
-  // Index 1: FR WHEEL SPEED, float
-  // Index 2: BL WHEEL SPEED, float
-  // Index 3: BR WHEEL SPEED, float
-  // Index 4: FL BRAKE TEMP, float
-  // Index 5: FR BRAKE TEMP, float
-  // Index 6: BL BRAKE TEMP, float
-  // Index 7: BR BRAKE TEMP, float
-  // Index 8: F BRAKE PRESSURE, int
-  // Index 9: R BRAKE PRESSURE, int
 
   info_ind = 0; // index for the miscellaneous information arrays
   i = 1; // data index
@@ -172,42 +145,39 @@ function dataSlicing(data){
       break;
     }
 
+    const sensor = C.SENSORS[info_ind];
+
     let value = data[i].toString(2) + data[i-1].toString(2); // little endian
-    value = processData(value, info_ind);
-    dataObj[sensors[info_ind]] = {
+    value = processData(value, sensor);
+    dataObj[sensor.name] = {
       'val': value,
       'time': curTime - START_TIME,
     }
 
     // Iteratior increment
-    i += VALUE_LENGTHS[info_ind] // increment with current data value length
+    i += sensor.bytes_length // increment with current data value length
     info_ind += 1;
   }
   
   return dataObj;
 }
 
-
-function processData(value, info_ind){
+// process byte data into float/int
+function processData(value, sensor){
   // value -> the data in bytes
   // type -> type of data, int or float
-  let type = VALUE_TYPES[info_ind];
-  let bias_bool = BIAS_BOOL_ARRAY[info_ind];
+  let type = sensor.type;
+  let bias = sensor.bias;
 
   if (type == "int"){
     // process to int
     return parseInt(value, 2);
   } else if (type == "float"){
     // process to float
-    // see if data needs bias attached
-    if (bias_bool){
-      return parseInt(value, 2)*scale + bias;
-    }{
-      return parseInt(value, 2)*scale;
-    }
+    return parseInt(value, 2)*scale + bias;
   }
-
-  return value
+  // default return 0
+  return 0
 }
 
 
@@ -254,7 +224,7 @@ function processData(value, info_ind){
 // }
 
 
-dynamoDBHelper.sendDataToDynamoDB(temp);
+// dynamoDBHelper.sendDataToDynamoDB(temp);
 
 
 // ****************************** MISC ***********************************
