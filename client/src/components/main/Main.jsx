@@ -10,12 +10,12 @@ export default function Main(props) {
 
   return(
     <MainContainer>
-      <Topbar
+      {/* <Topbar
         isLive={props.isLive}
         receiving={false}
         viewState={viewState}
         setViewState={(newState) => setViewState(newState)}
-      />
+      /> */}
       <VertSpacer />
       <DataDisplay
         viewState={viewState}
