@@ -1,6 +1,7 @@
 //****************************** CONFIG ***************************************
 
 const IS_TESTING = true;
+const DATA_PERIOD = 0.5; // seconds
 
 
 //****************************** SENSORS ***************************************
@@ -41,6 +42,6 @@ SENSORS.forEach(sensor => { SENSOR_DICT[sensor.name] = sensor; })
 
 
 module.exports = {
-    IS_TESTING,
+    IS_TESTING, DATA_PERIOD,
     NUM_OF_SENSORS, SENSOR_BYTE_LENGTH, SENSOR_NAMES, SENSORS, SENSOR_DICT
 }

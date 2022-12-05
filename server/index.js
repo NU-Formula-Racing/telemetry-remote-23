@@ -28,8 +28,8 @@ TODO:
 
 const express = require("express");
 const http = require("http");
-const socketio = require('socket.io');
 const cors = require("cors");
+const socketio = require('socket.io');
 const util = require('util');
 const { SerialPort } = require("serialport");
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
@@ -50,21 +50,27 @@ const laptopPort = new SerialPort({
     }
 });
 
-// configure node.js server
+// configure and start node.js server
 const app = express();
 const PORT = process.env.PORT || 3001;
 const corsOptions = {
+  // why do we use port 63613 here?
   origin: "http://localhost:63613",
   credentials:true,            //access-control-allow-credentials:true
   // allowedHeaders: ["header"],
 }
 app.use(cors(corsOptions))
 
-// build websocket server
+// configure and start websocket server
 const server = http.createServer(app);
+server.listen(PORT, () => {
+  console.log(`server listening on port ${PORT}`);
+});
 const io = socketio(server,{cors:{origin:"*"}});
 
 const START_TIME = Date.now() / 1000;
+
+
 
 // Miscellaneous - Real
 // const scale = 10;
@@ -95,9 +101,10 @@ io.on('connection', (socket) => {
     callback(initValues);
   });
 
+  // send sensor data to client
   if (C.IS_TESTING){
     // send generated data to client on 1s interval
-    setInterval(testing.sendFakeData, 1000, socket)
+    setInterval(testing.sendFakeData, C.DATA_PERIOD * 1000, socket)
   } else {
     // read data from serial port and send to client
     laptopPort.on('data', function (data) {
@@ -106,7 +113,7 @@ io.on('connection', (socket) => {
     });
   }
 
-  socket.on('disconnect', () => {å
+  socket.on('disconnect', () => {
     console.log('client disconnected');
   });
 });
@@ -232,6 +239,3 @@ function processData(value, sensor){
 
 // ****************************** MISC ***********************************
 
-server.listen(PORT, () => {
-  console.log(`server listening on port ${PORT}`);
-});
