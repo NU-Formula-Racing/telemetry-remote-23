@@ -1,11 +1,9 @@
 /***
 TODO:
-- Clean up index.js 
-  - pull out client, usb port, dynamodb code
-  - make it modular for easier testing
-
-- Make a new node.js called factory to generate fake data
-  - will have failure and will come in at different period
+- use SQLite to persist data
+  - button to reset data in the client for every new session
+  - button to start new session and end current session
+  - button to remove old data? 
 
 - Use charts.js to display data
   - revamp the entire UI
@@ -19,13 +17,13 @@ TODO:
   - make display longer and can stack more
   - have different tabs with different views
 
-- DynamoDB
-  - locally store all data in memory
-  - send data to dynamodb on interval directly
-
 - Secondary:
   - add separate live data view with only numbers
   - try to make it look like images online
+  - containerize + k8s for better reliability and easier deployment?
+  - electron app for desktop? Can also use batch file to run the app
+  - button to restart server? 
+  - show server logs on client side
 ***/
 
 const express = require("express");

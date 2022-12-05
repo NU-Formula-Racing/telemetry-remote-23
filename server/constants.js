@@ -35,9 +35,9 @@ const NUM_OF_SENSORS = SENSORS.length;
 const SENSOR_BYTE_LENGTH = NUM_OF_SENSORS*2;
 
 var SENSOR_NAMES = []
-SENSORforEach(sensor => { SENSOR_NAMES.push(sensor.name); })
+SENSORS.forEach(sensor => { SENSOR_NAMES.push(sensor.name); })
 var SENSOR_DICT = {}
-SENSORforEach(sensor => { SENSOR_DICT[sensor.name] = sensor; })
+SENSORS.forEach(sensor => { SENSOR_DICT[sensor.name] = sensor; })
 
 
 module.exports = {
