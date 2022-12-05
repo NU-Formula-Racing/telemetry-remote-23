@@ -19,7 +19,7 @@ class DataRepository {
 
     create(sensorName, sensorVal, timestamp, sessionId) {
       return this.dao.run(
-        `INSERT INTO tasks (sensorName, sensorVal, timestamp, sessionId)
+        `INSERT INTO data (sensorName, sensorVal, timestamp, sessionId)
           VALUES (?, ?, ?, ?)`,
         [sensorName, sensorVal, timestamp, sessionId])
     }

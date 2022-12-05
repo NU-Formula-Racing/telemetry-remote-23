@@ -8,12 +8,13 @@ class DAO {
       if (err) {
         console.log('Could not connect to database', err)
       } else {
-        console.log('Connected to database')
+        console.log('Connected to database at ' + dbFilePath)
       }
     })
   }
 
   // encapsulate sqlite3 run() under bluebird promise 
+  // returns the id of the last inserted row
   run(sql, params = []) {
     return new Promise((resolve, reject) => {
       this.db.run(sql, params, function (err) {
@@ -22,7 +23,7 @@ class DAO {
           console.log(err)
           reject(err)
         } else {
-          resolve({ id: this.lastID })
+          resolve(this.lastID)
         }
       })
     })

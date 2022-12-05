@@ -25,7 +25,7 @@ TODO:
   - button to restart server? 
   - show server logs on client side
 ***/
-
+// imports for node modules
 const express = require("express");
 const http = require("http");
 const cors = require("cors");
@@ -33,8 +33,12 @@ const socketio = require('socket.io');
 const util = require('util');
 const { SerialPort } = require("serialport");
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
-
 const dynamoDBHelper = require('./dynamodb.js');
+// imports for SQLite
+const DAO = require('./database/DAO.js')
+const DataRepository = require('./database/DataRepository.js')
+const SessionRepository = require('./database/SessionRepository.js')
+// imports for custom modules
 const C = require('./constants.js');
 const testing = require('./testing.js');
 
@@ -70,7 +74,58 @@ const io = socketio(server,{cors:{origin:"*"}});
 
 const START_TIME = Date.now() / 1000;
 
-
+// configure and build sqlite tables
+const dao = new DAO('./database.sqlite3')
+const sessionRepo = new SessionRepository(dao)
+const dataRepo = new DataRepository(dao)
+// sessionId needs to be accesssed globally
+let sessionId
+sessionRepo.createTable()
+  .then(() => dataRepo.createTable())
+  .then(() => sessionRepo.create("test session"))
+  .then((dataId) => {
+    sessionId = dataId
+    const sensorData = [
+      {
+        sensorName: 'sensor1',
+        sensorVal: 1.01,
+        timestamp: Date.now(),
+        sessionId: sessionId
+      },
+      {
+        sensorName: 'sensor2',
+        sensorVal: 2.02,
+        timestamp: Date.now(),
+        sessionId: sessionId
+      },
+    ]
+    // treat each dataRepo.create as a promise
+    return Promise.all(sensorData.map((data) => {
+      const { sensorName, sensorVal, timestamp, sessionId } = data
+      return dataRepo.create(sensorName, sensorVal, timestamp, sessionId)
+    }))
+  })
+  .then(() => sessionRepo.getById(sessionId))
+  .then((fetchedSession) => {
+    console.log(`\nRetreived session from database`)
+    console.log(`session id = ${fetchedSession.id}`)
+    console.log(`session name = ${fetchedSession.name}`)
+    return dataRepo.getBySessionId(sessionId)
+  })
+  .then((fetchedData) => {
+    console.log(`\nRetreived data from database`)
+    fetchedData.forEach((data) => {
+      const { sensorName, sensorVal, timestamp, sessionId } = data
+      console.log(`sensorName = ${sensorName}`)
+      console.log(`sensorVal = ${sensorVal}`)
+      console.log(`timestamp = ${timestamp}`)
+      console.log(`sessionId = ${sessionId}`)
+    })
+  })
+  .catch((err) => {
+    console.log('Error: ')
+    console.log(JSON.stringify(err))
+  })
 
 // Miscellaneous - Real
 // const scale = 10;
