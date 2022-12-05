@@ -38,6 +38,7 @@ const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 
 const dynamoDBHelper = require('./dynamodb.js');
 const C = require('./constants.js');
+const testing = require('./testing.js');
 
 // define serial port
 // List of all possible ports as far as we know:
@@ -96,11 +97,16 @@ io.on('connection', (socket) => {
     callback(initValues);
   });
 
-  // read data from serial port and send to client
-  laptopPort.on('data', function (data) {
-    console.log(data);
-    emitData(data, socket);
-  });
+  if (C.IS_TESTING){
+    // send generated data to client on 1s interval
+    setInterval(testing.sendFakeData, 1000, socket)
+  } else {
+    // read data from serial port and send to client
+    laptopPort.on('data', function (data) {
+      console.log(data);
+      emitData(data, socket);
+    });
+  }
 
   socket.on('disconnect', () => {å
     console.log('client disconnected');
@@ -118,7 +124,7 @@ function emitData(data, socket) {
   // dataObj (dictionary): sensorName -> dataList
   // dataList (array): [...,[time, val],...]
   let dataObj = dataSlicing(data);
-  console.log("Current to client object: ", dataObj);
+  console.log("DataObj sending to client: ", dataObj);
 
   // TODO: need to change this to use persistent data
   dynamoDBHelper.sendDataToDynamoDB(dataObj);
@@ -139,8 +145,7 @@ function dataSlicing(data){
   // while loop for getting data
   while (i < data.length){
 
-    // when we reach the last bit
-    // The termination bit apparently
+    // break after reaching terminating bit 
     if (i == data.length - 1){
       break;
     }
