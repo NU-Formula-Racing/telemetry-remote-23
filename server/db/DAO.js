@@ -2,6 +2,9 @@ const sqlite3 = require('sqlite3')
 const Promise = require('bluebird')
 
 // data access object
+// configures the database connection for interacting with local sqlite instance
+// used for temporary storage of data from sensors
+// can persist session data if even client or server is closed/restarted
 class DAO {
   constructor(dbFilePath) {
     this.db = new sqlite3.Database(dbFilePath, (err) => {
@@ -11,6 +14,7 @@ class DAO {
         console.log('Connected to database at ' + dbFilePath)
       }
     })
+    this.db.run('PRAGMA foreign_keys = ON')
   }
 
   // encapsulate sqlite3 run() under bluebird promise 

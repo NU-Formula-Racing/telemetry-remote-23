@@ -1,7 +1,8 @@
 //****************************** CONFIG ***************************************
 
+const DB_PATH = './server/db/database.sqlite3'
 const IS_TESTING = true;
-const DATA_PERIOD = 0.5; // seconds
+const DATA_PERIOD = 1; // seconds
 
 
 //****************************** SENSORS ***************************************
@@ -42,6 +43,6 @@ SENSORS.forEach(sensor => { SENSOR_DICT[sensor.name] = sensor; })
 
 
 module.exports = {
-    IS_TESTING, DATA_PERIOD,
+    IS_TESTING, DATA_PERIOD, DB_PATH,
     NUM_OF_SENSORS, SENSOR_BYTE_LENGTH, SENSOR_NAMES, SENSORS, SENSOR_DICT
 }

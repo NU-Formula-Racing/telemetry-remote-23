@@ -56,12 +56,64 @@ class DataRepository {
       )
     }
 
-    delete(id) {
+    deleteBySession(id) {
       return this.dao.run(
         `DELETE FROM sessions WHERE id = ?`,
         [id]
       )
     }
+
+    deleteAll() {
+      return this.dao.run(`DELETE FROM data`)
+    }
   }
   
   module.exports = DataRepository;
+
+
+  // code to insert data into data
+  
+// sessionId needs to be accesssed globally
+/*
+.then(() => {
+  const sensorData = [
+    {
+      sensorName: 'sensor1',
+      sensorVal: 1.01,
+      timestamp: Date.now(),
+      sessionId: sessionId
+    },
+    {
+      sensorName: 'sensor2',
+      sensorVal: 2.02,
+      timestamp: Date.now(),
+      sessionId: sessionId
+    },
+  ]
+  // treat each dataRepo.create as a promise
+  return Promise.all(sensorData.map((data) => {
+    const { sensorName, sensorVal, timestamp, sessionId } = data
+    return dataRepo.create(sensorName, sensorVal, timestamp, sessionId)
+  }))
+})
+.then(() => sessionRepo.getById(sessionId))
+  .then((fetchedSession) => {
+    console.log(`\nRetreived session from database`)
+    console.log(`session id = ${fetchedSession.id}`)
+    console.log(`session name = ${fetchedSession.name}`)
+    return dataRepo.getBySessionId(sessionId)
+  })
+  .then((fetchedData) => {
+    console.log(`\nRetreived data from database`)
+    fetchedData.forEach((data) => {
+      const { sensorName, sensorVal, timestamp, sessionId } = data
+      console.log(`sensorName = ${sensorName}`)
+      console.log(`sensorVal = ${sensorVal}`)
+      console.log(`timestamp = ${timestamp}`)
+      console.log(`sessionId = ${sessionId}`)
+    })
+  })
+  .then(() => sessionRepo.deleteAll())
+  .then(() => dataRepo.deleteAll())
+*/
+

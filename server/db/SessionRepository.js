@@ -48,6 +48,10 @@ class SessionRepository {
         [id]
       )
     }
+
+    deleteAll() {
+      return this.dao.run(`DELETE FROM sessions`)
+    }
   }
   
   module.exports = SessionRepository;

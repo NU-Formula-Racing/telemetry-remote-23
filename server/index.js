@@ -1,6 +1,7 @@
 /***
 TODO:
 - use SQLite to persist data
+  - popup to choose new session or use existing session
   - button to reset data in the client for every new session
   - button to start new session and end current session
   - button to remove old data? 
@@ -35,14 +36,14 @@ const { SerialPort } = require("serialport");
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 const dynamoDBHelper = require('./dynamodb.js');
 // imports for SQLite
-const DAO = require('./database/DAO.js')
-const DataRepository = require('./database/DataRepository.js')
-const SessionRepository = require('./database/SessionRepository.js')
+const DAO = require('./db/DAO.js')
+const DataRepository = require('./db/DataRepository.js')
+const SessionRepository = require('./db/SessionRepository.js')
 // imports for custom modules
 const C = require('./constants.js');
 const testing = require('./testing.js');
 
-// define serial port
+// ***************** SETUP SERVER, SOCKETS & DB *****************
 // List of all possible ports as far as we know:
 // 1. /dev/tty.usbmodem115442301
 const laptopPort = new SerialPort({
@@ -55,12 +56,13 @@ const laptopPort = new SerialPort({
 });
 
 // configure and start node.js server
+console.log('Starting express server...')
 const app = express();
 const PORT = process.env.PORT || 3001;
 const corsOptions = {
   // why do we use port 63613 here?
   origin: "http://localhost:63613",
-  credentials:true,            //access-control-allow-credentials:true
+  credentials:true,            
   // allowedHeaders: ["header"],
 }
 app.use(cors(corsOptions))
@@ -71,61 +73,20 @@ server.listen(PORT, () => {
   console.log(`server listening on port ${PORT}`);
 });
 const io = socketio(server,{cors:{origin:"*"}});
-
 const START_TIME = Date.now() / 1000;
 
 // configure and build sqlite tables
-const dao = new DAO('./database.sqlite3')
+const dao = new DAO(C.DB_PATH)
 const sessionRepo = new SessionRepository(dao)
 const dataRepo = new DataRepository(dao)
-// sessionId needs to be accesssed globally
 let sessionId
 sessionRepo.createTable()
   .then(() => dataRepo.createTable())
-  .then(() => sessionRepo.create("test session"))
-  .then((dataId) => {
-    sessionId = dataId
-    const sensorData = [
-      {
-        sensorName: 'sensor1',
-        sensorVal: 1.01,
-        timestamp: Date.now(),
-        sessionId: sessionId
-      },
-      {
-        sensorName: 'sensor2',
-        sensorVal: 2.02,
-        timestamp: Date.now(),
-        sessionId: sessionId
-      },
-    ]
-    // treat each dataRepo.create as a promise
-    return Promise.all(sensorData.map((data) => {
-      const { sensorName, sensorVal, timestamp, sessionId } = data
-      return dataRepo.create(sensorName, sensorVal, timestamp, sessionId)
-    }))
-  })
-  .then(() => sessionRepo.getById(sessionId))
-  .then((fetchedSession) => {
-    console.log(`\nRetreived session from database`)
-    console.log(`session id = ${fetchedSession.id}`)
-    console.log(`session name = ${fetchedSession.name}`)
-    return dataRepo.getBySessionId(sessionId)
-  })
-  .then((fetchedData) => {
-    console.log(`\nRetreived data from database`)
-    fetchedData.forEach((data) => {
-      const { sensorName, sensorVal, timestamp, sessionId } = data
-      console.log(`sensorName = ${sensorName}`)
-      console.log(`sensorVal = ${sensorVal}`)
-      console.log(`timestamp = ${timestamp}`)
-      console.log(`sessionId = ${sessionId}`)
-    })
-  })
-  .catch((err) => {
-    console.log('Error: ')
-    console.log(JSON.stringify(err))
-  })
+  .then(() => sessionRepo.deleteAll()) // clears previous data
+  // FIXME: this creates a new session every time the server is restarted
+  .then(() => sessionRepo.create(`test session ${new Date().getHours()} : ${new Date().getMinutes()}`))
+  .then((dataId) => { sessionId = dataId })
+  .catch((err) => { console.log('SQLite on create Error: ' + err) })
 
 // Miscellaneous - Real
 // const scale = 10;
@@ -159,7 +120,9 @@ io.on('connection', (socket) => {
   // send sensor data to client
   if (C.IS_TESTING){
     // send generated data to client on 1s interval
-    setInterval(testing.sendFakeData, C.DATA_PERIOD * 1000, socket)
+    setInterval(
+      testing.sendFakeData, C.DATA_PERIOD * 1000, 
+      socket, dataRepo, sessionId)
   } else {
     // read data from serial port and send to client
     laptopPort.on('data', function (data) {
@@ -290,7 +253,3 @@ function processData(value, sensor){
 
 
 // dynamoDBHelper.sendDataToDynamoDB(temp);
-
-
-// ****************************** MISC ***********************************
-
