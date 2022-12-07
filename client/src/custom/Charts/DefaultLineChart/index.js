@@ -14,9 +14,9 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
 // LineChart configurations
-import configs from "examples/Charts/LineCharts/LineChart/configs";
+import configs from "custom/Charts/DefaultLineChart/configs";
 
-function LineChart({ color, title, description, chart }) {
+function DefaultLineChart({ color, title, description, chart }) {
   const { data, options } = configs(chart.labels || [], chart.datasets || {});
 
   return (
@@ -60,17 +60,17 @@ function LineChart({ color, title, description, chart }) {
 }
 
 // Setting default values for the props of LineChart
-LineChart.defaultProps = {
+DefaultLineChart.defaultProps = {
   color: "dark",
   description: "",
 };
 
 // Typechecking props for the LineChart
-LineChart.propTypes = {
+DefaultLineChart.propTypes = {
   color: PropTypes.oneOf(["primary", "secondary", "info", "success", "warning", "error", "dark"]),
   title: PropTypes.string.isRequired,
   description: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   chart: PropTypes.objectOf(PropTypes.oneOfType([PropTypes.array, PropTypes.object])).isRequired,
 };
 
-export default LineChart;
+export default DefaultLineChart;

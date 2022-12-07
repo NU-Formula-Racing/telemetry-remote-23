@@ -26,7 +26,7 @@ import MDTypography from "components/MDTypography";
 import MDButton from "components/MDButton";
 
 // Custom styles for the Configurator
-import ConfiguratorRoot from "examples/Configurator/ConfiguratorRoot";
+import ConfiguratorRoot from "custom/Configurator/ConfiguratorRoot";
 
 // Material Dashboard 2 React context
 import {

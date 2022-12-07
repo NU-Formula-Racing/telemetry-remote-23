@@ -22,9 +22,9 @@ import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import DataTable from "examples/Tables/DataTable";
+import DashboardLayout from "custom/LayoutContainers/DashboardLayout";
+import NavBar from "custom/Navbar";
+import DataTable from "custom/DataTable";
 
 // Data
 import authorsTableData from "layouts/tables/data/authorsTableData";
@@ -35,7 +35,7 @@ function Tables() {
   const { columns: pColumns, rows: pRows } = projectsTableData();
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      <NavBar />
       <MDBox pt={6} pb={3}>
         <Grid container spacing={6}>
           <Grid item xs={12}>

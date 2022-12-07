@@ -25,7 +25,7 @@ import Icon from "@mui/material/Icon";
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
 
-function ComplexStatisticsCard({ color, title, count, percentage, icon }) {
+function StatisticsCard({ color, title, count, percentage, icon }) {
   return (
     <Card>
       <MDBox display="flex" justifyContent="space-between" pt={1} px={2}>
@@ -71,8 +71,8 @@ function ComplexStatisticsCard({ color, title, count, percentage, icon }) {
   );
 }
 
-// Setting default values for the props of ComplexStatisticsCard
-ComplexStatisticsCard.defaultProps = {
+// Setting default values for the props of StatisticsCard
+StatisticsCard.defaultProps = {
   color: "info",
   percentage: {
     color: "success",
@@ -81,8 +81,8 @@ ComplexStatisticsCard.defaultProps = {
   },
 };
 
-// Typechecking props for the ComplexStatisticsCard
-ComplexStatisticsCard.propTypes = {
+// Typechecking props for the StatisticsCard
+StatisticsCard.propTypes = {
   color: PropTypes.oneOf([
     "primary",
     "secondary",
@@ -112,4 +112,4 @@ ComplexStatisticsCard.propTypes = {
   icon: PropTypes.node.isRequired,
 };
 
-export default ComplexStatisticsCard;
+export default StatisticsCard;

@@ -1,18 +1,3 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 // @mui material components
 import Grid from "@mui/material/Grid";
 
@@ -20,30 +5,27 @@ import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 
 // Material Dashboard 2 React example components
-import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
-import DashboardNavbar from "examples/Navbars/DashboardNavbar";
-import LineChart from "examples/Charts/LineCharts/LineChart";
-import ComplexStatisticsCard from "examples/Cards/StatisticsCards/ComplexStatisticsCard";
+import DashboardLayout from "custom/LayoutContainers/DashboardLayout";
+import NavBar from "custom/Navbar";
+import DefaultLineChart from "custom/Charts/DefaultLineChart";
+import StatisticsCard from "custom/Cards/StatisticsCard";
 
 // Data
 import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
 
 // Dashboard components
-// import Projects from "layouts/dashboard/components/Projects";
-// import OrdersOverview from "layouts/dashboard/components/OrdersOverview";
-
 function Dashboard() {
   const { sales, tasks } = reportsLineChartData;
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      <NavBar />
       <MDBox>
         <MDBox>
           <Grid container spacing={3}>
             <Grid item xs={12} md={12} lg={12}>
               <MDBox>
-                <LineChart
+                <DefaultLineChart
                   color="dark"
                   title="daily sales"
                   description={
@@ -57,7 +39,7 @@ function Dashboard() {
             </Grid>
             <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
-                <LineChart
+                <DefaultLineChart
                   color="dark"
                   title="completed tasks"
                   description={
@@ -74,7 +56,7 @@ function Dashboard() {
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>
             <MDBox mb={1.5}>
-              <ComplexStatisticsCard
+              <StatisticsCard
                 color="dark"
                 icon="weekend"
                 title="Bookings"
@@ -89,7 +71,7 @@ function Dashboard() {
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
             <MDBox mb={1.5}>
-              <ComplexStatisticsCard
+              <StatisticsCard
                 icon="leaderboard"
                 title="Today's Users"
                 count="2,300"
@@ -103,7 +85,7 @@ function Dashboard() {
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
             <MDBox mb={1.5}>
-              <ComplexStatisticsCard
+              <StatisticsCard
                 color="success"
                 icon="store"
                 title="Revenue"
@@ -118,7 +100,7 @@ function Dashboard() {
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
             <MDBox mb={1.5}>
-              <ComplexStatisticsCard
+              <StatisticsCard
                 color="primary"
                 icon="person_add"
                 title="Followers"
@@ -132,16 +114,6 @@ function Dashboard() {
             </MDBox>
           </Grid>
         </Grid>
-        {/* <MDBox>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6} lg={8}>
-              <Projects />
-            </Grid>
-            <Grid item xs={12} md={6} lg={4}>
-              <OrdersOverview />
-            </Grid>
-          </Grid>
-        </MDBox> */}
       </MDBox>
     </DashboardLayout>
   );

@@ -32,20 +32,15 @@ import MDBox from "components/MDBox";
 import MDInput from "components/MDInput";
 
 // Material Dashboard 2 React example components
-import Breadcrumbs from "examples/Breadcrumbs";
+import Breadcrumbs from "custom/Breadcrumbs";
 
-// Custom styles for DashboardNavbar
-import {
-  navbar,
-  navbarContainer,
-  navbarRow,
-  navbarIconButton,
-} from "examples/Navbars/DashboardNavbar/styles";
+// Custom styles for NavBar
+import { navbar, navbarContainer, navbarRow, navbarIconButton } from "custom/Navbar/styles";
 
 // Material Dashboard 2 React context
 import { useMaterialUIController, setTransparentNavbar, setOpenConfigurator } from "context";
 
-function DashboardNavbar({ absolute, light, isMini }) {
+function NavBar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
   const { transparentNavbar, fixedNavbar, openConfigurator, darkMode } = controller;
@@ -126,18 +121,18 @@ function DashboardNavbar({ absolute, light, isMini }) {
   );
 }
 
-// Setting default values for the props of DashboardNavbar
-DashboardNavbar.defaultProps = {
+// Setting default values for the props of NavBar
+NavBar.defaultProps = {
   absolute: false,
   light: false,
   isMini: false,
 };
 
-// Typechecking props for the DashboardNavbar
-DashboardNavbar.propTypes = {
+// Typechecking props for the NavBar
+NavBar.propTypes = {
   absolute: PropTypes.bool,
   light: PropTypes.bool,
   isMini: PropTypes.bool,
 };
 
-export default DashboardNavbar;
+export default NavBar;
