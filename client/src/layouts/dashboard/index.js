@@ -27,10 +27,10 @@ function Dashboard() {
               <MDBox>
                 <DefaultLineChart
                   color="dark"
-                  title="daily sales"
+                  title="Wheel Speed"
                   description={
                     <>
-                      (<strong>+15%</strong>) increase in today sales.
+                      <strong>500</strong> rpm
                     </>
                   }
                   chart={sales}
@@ -41,10 +41,10 @@ function Dashboard() {
               <MDBox mb={3}>
                 <DefaultLineChart
                   color="dark"
-                  title="completed tasks"
+                  title="Brake Pressure"
                   description={
                     <>
-                      (<strong>+15%</strong>) increase in today sales.
+                      <strong>90</strong> Units
                     </>
                   }
                   chart={tasks}
@@ -59,8 +59,8 @@ function Dashboard() {
               <StatisticsCard
                 color="dark"
                 icon="weekend"
-                title="Bookings"
-                count={281}
+                title="FR Brake Temp"
+                count={88}
                 percentage={{
                   color: "success",
                   amount: "+55%",
@@ -73,8 +73,8 @@ function Dashboard() {
             <MDBox mb={1.5}>
               <StatisticsCard
                 icon="leaderboard"
-                title="Today's Users"
-                count="2,300"
+                title="FL Brake Temp"
+                count={87}
                 percentage={{
                   color: "success",
                   amount: "+3%",
@@ -88,8 +88,8 @@ function Dashboard() {
               <StatisticsCard
                 color="success"
                 icon="store"
-                title="Revenue"
-                count="34k"
+                title="BR Brake Temp"
+                count={87}
                 percentage={{
                   color: "success",
                   amount: "+1%",
@@ -103,8 +103,8 @@ function Dashboard() {
               <StatisticsCard
                 color="primary"
                 icon="person_add"
-                title="Followers"
-                count="+91"
+                title="BL Brake Temp"
+                count={90}
                 percentage={{
                   color: "success",
                   amount: "",

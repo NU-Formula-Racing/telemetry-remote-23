@@ -36,6 +36,8 @@
     "react-router-dom": "6.2.1",
     "react-scripts": "5.0.0",
     "react-table": "7.7.0",
+    "socket.io": "^4.5.4",
+    "socket.io-client": "^4.5.4",
     "stylis": "4.0.13",
     "stylis-plugin-rtl": "2.1.1",
     "web-vitals": "2.1.4",

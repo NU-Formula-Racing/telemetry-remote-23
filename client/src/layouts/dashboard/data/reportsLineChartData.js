@@ -15,11 +15,11 @@ Coded by www.creative-tim.com
 
 export default {
   sales: {
-    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: { label: "Mobile apps", data: [50, 40, 300, 320, 500, 350, 200, 230, 500] },
+    labels: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
+    datasets: { label: "Wheel Speed", data: [50, 40, 300, 320, 500, 350, 200, 230, 500, 400, 500] },
   },
   tasks: {
-    labels: ["Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-    datasets: { label: "Desktop apps", data: [50, 40, 300, 220, 500, 250, 400, 230, 500] },
+    labels: ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100"],
+    datasets: { label: "Brake Pressure", data: [5, 25, 40, 32, 55, 60, 40, 59, 90, 63, 90] },
   },
 };

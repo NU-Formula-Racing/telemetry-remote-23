@@ -1,17 +1,13 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
+// TODO:
+// 1. Hook up data to display (store data in state using context? pass in range as props?)
+//     store data in global state, component use name and index to access data
+//    a. hook up 8 sensors to graphs (overlap?)
+//        i. display average on the title of the graph
+//    b. hook up 4 sensors to stats
+// 2. make sure the right props are passed (no static img/data)
+// 3. make scroll box for graphs ?
+// 4. make multiple dashboards
+// 5. focus on funtionality, then style
 
 import { useEffect } from "react";
 
@@ -42,11 +38,37 @@ import { useMaterialUIController } from "context";
 import brandWhite from "assets/images/F1-logo.png";
 // import brandDark from "assets/images/F1-logo.png";
 
+// Socket.io
+import socketio from "socket.io-client";
+
+// util for inspecting objects for debugging
+import util from "util";
+
+const socket = socketio.connect("http://localhost:3001");
+
 export default function App() {
   const [controller] = useMaterialUIController();
   const { layout, sidenavColor, transparentSidenav, whiteSidenav, darkMode } = controller;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);
   const { pathname } = useLocation();
+
+  // called right after the first render completes
+  useEffect(async () => {
+    await socket.emit("getSensors", (res) => {
+      console.log("getSensors res ", res);
+      // this.setState({ currentSensors: res });
+      // socket.disconnect();
+    });
+  }, []);
+
+  // initialized on first render, stays active until component unmounted
+  useEffect(() => {
+    socket.on("sendSensorData", (sensorData) => {
+      console.log(
+        `sensor data ${util.inspect(sensorData, { showHidden: false, depth: null, colors: true })}`
+      );
+    });
+  }, []);
 
   // Setting page scroll to 0 when changing the route
   useEffect(() => {
