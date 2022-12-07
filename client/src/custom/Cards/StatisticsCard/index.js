@@ -19,32 +19,46 @@ import PropTypes from "prop-types";
 // @mui material components
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
-import Icon from "@mui/material/Icon";
+// import Icon from "@mui/material/Icon";
+import CardMedia from "@mui/material/CardMedia";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+import MDProgress from "components/MDProgress";
+import image from "assets/images/front-right-wheel.png";
 
-function StatisticsCard({ color, title, count, percentage, icon }) {
+function StatisticsCard({ color, title, count }) {
   return (
     <Card>
-      <MDBox display="flex" justifyContent="space-between" pt={1} px={2}>
+      <MDBox display="flex" justifyContent="space-between" pt={1} pr={2}>
         <MDBox
-          variant="gradient"
-          bgColor={color}
+          variant="contained"
+          bgColor="gray.600"
           color={color === "light" ? "dark" : "white"}
-          coloredShadow={color}
           borderRadius="xl"
           display="flex"
           justifyContent="center"
           alignItems="center"
-          width="4rem"
-          height="4rem"
-          mt={-3}
+          width="10rem"
+          height="3rem"
+          mt={1}
         >
-          <Icon fontSize="medium" color="inherit">
+          {/* <Icon fontSize="medium" color="inherit">
             {icon}
-          </Icon>
+          </Icon> */}
+          <CardMedia
+            image={image}
+            component="img"
+            title="hello"
+            sx={{
+              maxWidth: "99%",
+              margin: 0,
+              objectFit: "cover",
+              // boxShadow: "0px 0px 10px 10px rgba(225,225,225,1) inset",
+              // objectPosition: "center",
+            }}
+          />
         </MDBox>
         <MDBox textAlign="right" lineHeight={1.25}>
           <MDTypography variant="button" fontWeight="light" color="text">
@@ -55,17 +69,14 @@ function StatisticsCard({ color, title, count, percentage, icon }) {
       </MDBox>
       <Divider />
       <MDBox pb={2} px={2}>
-        <MDTypography component="p" variant="button" color="text" display="flex">
-          <MDTypography
-            component="span"
-            variant="button"
-            fontWeight="bold"
-            color={percentage.color}
-          >
-            {percentage.amount}
+        <MDBox display="flex" alignItems="center" justifyContent="flex-end">
+          <MDTypography variant="caption" color="text" fontWeight="medium">
+            {80}%
           </MDTypography>
-          &nbsp;{percentage.label}
-        </MDTypography>
+          <MDBox ml={0.5} width="9em">
+            <MDProgress variant="gradient" color="info" value={80} />
+          </MDBox>
+        </MDBox>
       </MDBox>
     </Card>
   );
@@ -109,7 +120,7 @@ StatisticsCard.propTypes = {
     amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
     label: PropTypes.string,
   }),
-  icon: PropTypes.node.isRequired,
+  // icon: PropTypes.node.isRequired,
 };
 
 export default StatisticsCard;
