@@ -32,4 +32,3 @@ passwords.txt
 database.sqlite3
 server/db/database.sqlite3
 server/db/database.sqlite3-journal
-server/db/database.sqlite3

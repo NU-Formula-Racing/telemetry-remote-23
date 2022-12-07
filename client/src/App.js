@@ -9,7 +9,7 @@
 // 4. make multiple dashboards
 // 5. focus on funtionality, then style
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // react-router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -32,7 +32,7 @@ import themeDark from "assets/theme-dark";
 import routes from "routes";
 
 // Material Dashboard 2 React contexts
-import { useMaterialUIController } from "context";
+import { useMaterialUIController, setSensorData, setNewSensorData } from "context";
 
 // Images
 import brandWhite from "assets/images/F1-logo.png";
@@ -47,28 +47,58 @@ import util from "util";
 const socket = socketio.connect("http://localhost:3001");
 
 export default function App() {
-  const [controller] = useMaterialUIController();
-  const { layout, transparentSidenav, whiteSidenav, darkMode } = controller;
+  const [controller, dispatch] = useMaterialUIController();
+  const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData } = controller;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);
+  const [onInitData, setOnInitData] = useState(false);
   const { pathname } = useLocation();
 
+  const handleNewSensor = (res) => setSensorData(dispatch, res);
+
   // called right after the first render completes
-  useEffect(async () => {
-    await socket.emit("getSensors", (res) => {
-      console.log("getSensors res ", res);
-      // this.setState({ currentSensors: res });
-      // socket.disconnect();
+  // fetch init sensor data from server
+  useEffect(() => {
+    console.log("Component mounted. Fetching sensor data...");
+    socket.emit("getSensors", (res) => {
+      console.log("getSensors socket response: ", res);
+      handleNewSensor(res);
     });
   }, []);
 
-  // initialized on first render, stays active until component unmounted
+  const debug = true;
+  // called when sensorData state changes
   useEffect(() => {
-    socket.on("sendSensorData", (sensorData) => {
+    if (debug) {
       console.log(
-        `sensor data ${util.inspect(sensorData, { showHidden: false, depth: null, colors: true })}`
+        `sensorData state changed:\n ${util.inspect(sensorData, {
+          showHidden: false,
+          depth: null,
+          colors: true,
+        })}`
       );
+    }
+    // if sensorData is not empty, then begin loading data into memory
+    if (Object.keys(sensorData).length > 0 && !onInitData) {
+      setOnInitData(true);
+    }
+  }, [sensorData]);
+
+  // begin receiving real time data once sensorData state initialized
+  useEffect(() => {
+    socket.on("sendSensorData", (newSensorData) => {
+      if (onInitData) {
+        Object.keys(newSensorData).forEach((sensorName) => {
+          const dataObj = {
+            name: sensorName,
+            data: newSensorData[sensorName],
+          };
+          // all data is stored into global context
+          // mapping from sensor name to list of dataObj
+          setNewSensorData(dispatch, dataObj);
+        });
+      }
     });
-  }, []);
+  }, [onInitData]);
 
   // Setting page scroll to 0 when changing the route
   useEffect(() => {

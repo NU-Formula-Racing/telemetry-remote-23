@@ -86,6 +86,38 @@ sessionRepo.createTable()
   // FIXME: this creates a new session every time the server is restarted
   .then(() => sessionRepo.create(`test session ${new Date().getHours()} : ${new Date().getMinutes()}`))
   .then((dataId) => { sessionId = dataId })
+  .then(() => {
+    io.on('connection', (socket) => {
+      console.log(`${socket.id} client connected!`);
+    
+      // send list of sensor names and initial values to client
+      socket.on('getSensors', (callback) => {
+        initValues = {}
+        for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
+          initValues[C.SENSORS[i].name] = [{ val: 0.01, time: 0.01 }];
+        }
+        callback(initValues);
+      });
+    
+      // send sensor data to client
+      if (C.IS_TESTING){
+        // send generated data to client on 1s interval
+        setInterval(
+          testing.sendFakeData, C.DATA_PERIOD * 1000, 
+          socket, dataRepo, START_TIME, sessionId)
+      } else {
+        // read data from serial port and send to client
+        laptopPort.on('data', function (data) {
+          console.log(data);
+          emitData(data, socket);
+        });
+      }
+    
+      socket.on('disconnect', () => {
+        console.log('client disconnected');
+      });
+    });
+  })
   .catch((err) => { console.log('SQLite on create Error: ' + err) })
 
 // Miscellaneous - Real
@@ -104,37 +136,6 @@ sessionRepo.createTable()
 //   }
 // })
 
-// ****************************** SOCKET IO LISTENER ***************************************
-io.on('connection', (socket) => {
-  console.log(`${socket.id} client connected!`);
-
-  // send list of sensor names and initial values to client
-  socket.on('getSensors', (callback) => {
-    initValues = {}
-    for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
-      initValues[C.SENSORS[i].name] = [(0.01,0.01)];
-    }
-    callback(initValues);
-  });
-
-  // send sensor data to client
-  if (C.IS_TESTING){
-    // send generated data to client on 1s interval
-    setInterval(
-      testing.sendFakeData, C.DATA_PERIOD * 1000, 
-      socket, dataRepo, sessionId)
-  } else {
-    // read data from serial port and send to client
-    laptopPort.on('data', function (data) {
-      console.log(data);
-      emitData(data, socket);
-    });
-  }
-
-  socket.on('disconnect', () => {
-    console.log('client disconnected');
-  });
-});
 
 // ****************************** DATA PROCESSING ***************************************
 // Helper to proces and emit data into the socket
