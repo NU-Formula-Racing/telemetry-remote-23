@@ -36,6 +36,7 @@ import {
   setWhiteSidenav,
   setFixedNavbar,
   setDarkMode,
+  setSidenavColor,
 } from "context";
 
 function Configurator() {
@@ -74,7 +75,10 @@ function Configurator() {
     setTransparentSidenav(dispatch, false);
   };
   const handleFixedNavbar = () => setFixedNavbar(dispatch, !fixedNavbar);
-  const handleDarkMode = () => setDarkMode(dispatch, !darkMode);
+  const handleDarkMode = () => {
+    setDarkMode(dispatch, !darkMode);
+    setSidenavColor(dispatch, darkMode ? "info" : "dark");
+  };
 
   // sidenav type buttons styles
   const sidenavTypeButtonsStyles = ({

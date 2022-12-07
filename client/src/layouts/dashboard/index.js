@@ -4,6 +4,9 @@ import Grid from "@mui/material/Grid";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 
+// Material Dashboard 2 React contexts
+import { useMaterialUIController } from "context";
+
 // Material Dashboard 2 React example components
 import DashboardLayout from "custom/LayoutContainers/DashboardLayout";
 import NavBar from "custom/Navbar";
@@ -16,6 +19,8 @@ import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
 // Dashboard components
 function Dashboard() {
   const { sales, tasks } = reportsLineChartData;
+  const [controller] = useMaterialUIController();
+  const { darkMode } = controller;
 
   return (
     <DashboardLayout>
@@ -26,7 +31,7 @@ function Dashboard() {
             <Grid item xs={12} md={12} lg={12}>
               <MDBox>
                 <DefaultLineChart
-                  color="dark"
+                  color={darkMode ? "dark" : "info"}
                   title="Wheel Speed"
                   description={
                     <>
@@ -40,7 +45,7 @@ function Dashboard() {
             <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
                 <DefaultLineChart
-                  color="dark"
+                  color={darkMode ? "dark" : "info"}
                   title="Brake Pressure"
                   description={
                     <>

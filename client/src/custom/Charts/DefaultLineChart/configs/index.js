@@ -1,4 +1,10 @@
+// Material Dashboard 2 React contexts
+import { useMaterialUIController } from "context";
+
 function configs(labels, datasets) {
+  const [controller] = useMaterialUIController();
+  const { darkMode } = controller;
+
   return {
     data: {
       labels,
@@ -8,8 +14,8 @@ function configs(labels, datasets) {
           tension: 0,
           pointRadius: 5,
           pointBorderColor: "transparent",
-          pointBackgroundColor: "rgba(227, 177, 250, .8)",
-          borderColor: "rgba(227, 177, 250, .8)",
+          pointBackgroundColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
+          borderColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
           borderWidth: 4,
           backgroundColor: "transparent",
           fill: true,

@@ -48,7 +48,7 @@ const socket = socketio.connect("http://localhost:3001");
 
 export default function App() {
   const [controller] = useMaterialUIController();
-  const { layout, sidenavColor, transparentSidenav, whiteSidenav, darkMode } = controller;
+  const { layout, transparentSidenav, whiteSidenav, darkMode } = controller;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);
   const { pathname } = useLocation();
 
@@ -95,7 +95,7 @@ export default function App() {
       {layout === "dashboard" && (
         <>
           <Sidenav
-            color={sidenavColor}
+            color={darkMode ? "dark" : "info"}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandWhite : brandWhite}
             brandName="NUFSAE Telemetry"
             routes={routes}
