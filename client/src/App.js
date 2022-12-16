@@ -22,6 +22,9 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 // Material Dashboard 2 React example components
+import MDSnackbar from "components/MDSnackbar";
+
+// Material Dashboard 2 React example components
 import Sidenav from "custom/Sidenav";
 import Configurator from "custom/Configurator";
 
@@ -42,7 +45,6 @@ import brandWhite from "assets/images/F1-logo.png";
 // import brandDark from "assets/images/F1-logo.png";
 
 // Socket.io
-// import socketio from "socket.io-client";
 import { Manager } from "socket.io-client";
 
 // util for inspecting objects for debugging
@@ -51,19 +53,40 @@ import util from "util";
 const manager = new Manager("http://localhost:3001");
 const socket = manager.socket("/");
 
-// catch connection errors, can be used to print toasts
-manager.on("error", () => {
-  console.log("socket.io server may not be running.");
-});
-
-
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
   const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData } = controller;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [onInitData, setOnInitData] = useState(false);
   const { pathname } = useLocation();
+  // keep track of toast messages
+  const [errorSB, setErrorSB] = useState(false);
+  const [toastMsg, setToastMsg] = useState("error message");
+  const openErrorSB = () => setErrorSB(true);
+  const closeErrorSB = () => setErrorSB(false);
 
+  // catch connection errors, can be used to print toasts
+  manager.on("error", (e) => {
+    openErrorSB();
+    setToastMsg(e.message);
+    console.log(e);
+  });
+
+  const renderErrorSB = (
+    <MDSnackbar
+      color="error"
+      icon="warning"
+      title={toastMsg}
+      content="socket.io error. server may not be started."
+      dateTime="now"
+      open={errorSB}
+      onClose={closeErrorSB}
+      close={closeErrorSB}
+      bgWhite
+    />
+  );
+
+  // handle socket responses
   const handleInitSensorData = (res) => initSensorData(dispatch, res);
   const handleAppendSensorData = (res) => appendSensorData(dispatch, res);
 
@@ -125,11 +148,9 @@ export default function App() {
       if (route.collapse) {
         return getRoutes(route.collapse);
       }
-
       if (route.route) {
         return <Route exact path={route.route} element={route.component} key={route.key} />;
       }
-
       return null;
     });
 
@@ -152,6 +173,7 @@ export default function App() {
         {getRoutes(routes)}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
+      {renderErrorSB}
     </ThemeProvider>
   );
 }
