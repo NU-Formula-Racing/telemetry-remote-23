@@ -42,12 +42,20 @@ import brandWhite from "assets/images/F1-logo.png";
 // import brandDark from "assets/images/F1-logo.png";
 
 // Socket.io
-import socketio from "socket.io-client";
+// import socketio from "socket.io-client";
+import { Manager } from "socket.io-client";
 
 // util for inspecting objects for debugging
 import util from "util";
 
-const socket = socketio.connect("http://localhost:3001");
+const manager = new Manager("http://localhost:3001");
+const socket = manager.socket("/");
+
+// catch connection errors, can be used to print toasts
+manager.on("error", () => {
+  console.log("socket.io server may not be running.");
+});
+
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
