@@ -61,29 +61,38 @@ function Dashboard() {
       <NavBar />
       <MDBox>
         <MDBox>
-          <Grid container spacing={3}>
+          <Grid container spacing={0}>
             <Grid item xs={12} md={12} lg={12}>
               <MDBox> {renderCharts(0)} </MDBox>
             </Grid>
             <Grid item xs={12} md={12} lg={12}>
+              <MDBox> {renderCharts(1)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12}>
+              <MDBox> {renderCharts(2)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12}>
+              <MDBox> {renderCharts(3)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
-                <MDBox> {renderCharts(1)} </MDBox>
+                <MDBox> {renderCharts(4)} </MDBox>
               </MDBox>
             </Grid>
           </Grid>
         </MDBox>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}> {renderCards(0)} </MDBox>
+            <MDBox mb={1.5}> {renderCards(4)} </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}> {renderCards(1)} </MDBox>
+            <MDBox mb={1.5}> {renderCards(5)} </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}> {renderCards(2)} </MDBox>
+            <MDBox mb={1.5}> {renderCards(6)} </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}> {renderCards(3)} </MDBox>
+            <MDBox mb={1.5}> {renderCards(7)} </MDBox>
           </Grid>
         </Grid>
       </MDBox>
