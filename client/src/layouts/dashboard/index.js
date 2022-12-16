@@ -34,7 +34,7 @@ function Dashboard() {
     const chartProps = {
       color: darkMode ? "dark" : "secondary",
       titles: sensorGroupTitles,
-      scale: 200,
+      scale: 50,
     };
     const { color, titles, scale } = chartProps;
     return <AutoLineChart color={color} titles={titles} scale={scale} />;
