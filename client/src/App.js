@@ -1,14 +1,8 @@
 // TODO:
-// 1. Hook up data to display (store data in state using context? pass in range as props?)
-//     a. stop the graph from bouncing up
-//     b. need to round the seconds down (how to limit the number of labels displayed while maintining resolution)
-//     ba. add vertical line to show where the mouse is currently at inside of the
-//     c. adjust scale and width
-//     d. add the scroll bar on the bottom
-//     e. render multiple/all gaphs
-//     f. multiple dashboards?
-// 2. make sure the right props are passed (no static img/data)
-// 3. make scroll box for graphs ?
+// 1. multiple lines per graph
+// 2. optimize performance
+// 3. make scroll box for graphs
+// 4. adjust style (thinner graphs, display axis on last?)
 // 4. make multiple dashboards
 // 5. focus on funtionality, then style
 
@@ -38,7 +32,12 @@ import themeDark from "assets/theme-dark";
 import routes from "routes";
 
 // Material Dashboard 2 React contexts
-import { useMaterialUIController, initSensorData, appendSensorData } from "context";
+import {
+  useMaterialUIController,
+  initSensorData,
+  appendSensorData,
+  setDataReceived,
+} from "context";
 
 // Images
 import brandWhite from "assets/images/F1-logo.png";
@@ -89,6 +88,7 @@ export default function App() {
   // handle socket responses
   const handleInitSensorData = (res) => initSensorData(dispatch, res);
   const handleAppendSensorData = (res) => appendSensorData(dispatch, res);
+  const handleSetDataReceived = () => setDataReceived(dispatch);
 
   // called right after the first render completes
   // fetch init sensor data from server
@@ -133,6 +133,7 @@ export default function App() {
           // mapping from sensor name to list of dataObj
           handleAppendSensorData(dataObj);
         });
+        handleSetDataReceived();
       }
     });
   }, [onInitData]);

@@ -62,6 +62,9 @@ function reducer(state, action) {
         },
       };
     }
+    case "ALL_DATA_RECEIVED": {
+      return { ...state, dataReceived: !state.dataReceived };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -81,6 +84,7 @@ function MaterialUIControllerProvider({ children }) {
     layout: "dashboard",
     darkMode: true,
     sensorData: {},
+    dataReceived: false,
   };
 
   const [controller, dispatch] = useReducer(reducer, initialState);
@@ -121,6 +125,7 @@ const setLayout = (dispatch, value) => dispatch({ type: "LAYOUT", value });
 const setDarkMode = (dispatch, value) => dispatch({ type: "DARKMODE", value });
 const initSensorData = (dispatch, value) => dispatch({ type: "INIT_SENSOR_DATA", value });
 const appendSensorData = (dispatch, value) => dispatch({ type: "APPEND_SENSOR_DATA", value });
+const setDataReceived = (dispatch) => dispatch({ type: "ALL_DATA_RECEIVED" });
 
 export {
   MaterialUIControllerProvider,
@@ -137,4 +142,5 @@ export {
   setDarkMode,
   initSensorData,
   appendSensorData,
+  setDataReceived,
 };

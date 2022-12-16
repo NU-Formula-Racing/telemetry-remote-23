@@ -1,16 +1,30 @@
 // Material Dashboard 2 React contexts
 import { useMaterialUIController } from "context";
 
-function configs(labels, datasets) {
+function configs(titles) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
+  // FIXME: figure how to change data colors based on dataset
+  // const datasetList = titles.map((title) => ({
+  //   label: title,
+  //   tension: 0,
+  //   pointRadius: 0,
+  //   pointBorderColor: "transparent",
+  //   pointBackgroundColor: "transparent",
+  //   borderColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
+  //   borderWidth: 2,
+  //   backgroundColor: "transparent",
+  //   fill: true,
+  //   data: [],
+  //   maxBarThickness: 6,
+  // }));
 
   return {
     data: {
-      labels,
+      labels: [],
       datasets: [
         {
-          label: datasets.label,
+          label: titles[0],
           tension: 0,
           pointRadius: 0,
           pointBorderColor: "transparent",
@@ -19,7 +33,20 @@ function configs(labels, datasets) {
           borderWidth: 2,
           backgroundColor: "transparent",
           fill: true,
-          data: datasets.data,
+          data: [],
+          maxBarThickness: 6,
+        },
+        {
+          label: titles[1],
+          tension: 0,
+          pointRadius: 0,
+          pointBorderColor: "transparent",
+          pointBackgroundColor: "transparent",
+          borderColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
+          borderWidth: 2,
+          backgroundColor: "transparent",
+          fill: true,
+          data: [],
           maxBarThickness: 6,
         },
       ],

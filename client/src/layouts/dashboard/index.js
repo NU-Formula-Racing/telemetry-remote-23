@@ -23,15 +23,21 @@ function Dashboard() {
   const [controller] = useMaterialUIController();
   const { darkMode, sensorData } = controller;
   const sensorNames = Object.keys(sensorData);
+  // const sensorGroup1 = [0, 1, 2, 3];
+  const sensorGroup2 = [8, 9];
 
-  const renderCharts = (i) => {
+  const renderCharts = (sensorList) => {
+    const sensorGroupTitles = sensorList.map((i) =>
+      sensorNames.length > i ? sensorNames[i] : "Undefined"
+    );
+
     const chartProps = {
       color: darkMode ? "dark" : "info",
-      title: sensorNames.length > i ? sensorNames[i] : "Undefined",
-      scale: 50,
+      titles: sensorGroupTitles,
+      scale: 200,
     };
-    const { color, title, scale } = chartProps;
-    return <AutoLineChart color={color} title={title} scale={scale} />;
+    const { color, titles, scale } = chartProps;
+    return <AutoLineChart color={color} titles={titles} scale={scale} />;
   };
 
   const renderCards = (i) => {
@@ -62,21 +68,12 @@ function Dashboard() {
       <MDBox>
         <MDBox>
           <Grid container spacing={0}>
-            <Grid item xs={12} md={12} lg={12}>
-              <MDBox> {renderCharts(0)} </MDBox>
-            </Grid>
-            <Grid item xs={12} md={12} lg={12}>
-              <MDBox> {renderCharts(1)} </MDBox>
-            </Grid>
-            <Grid item xs={12} md={12} lg={12}>
-              <MDBox> {renderCharts(2)} </MDBox>
-            </Grid>
-            <Grid item xs={12} md={12} lg={12}>
-              <MDBox> {renderCharts(3)} </MDBox>
-            </Grid>
+            {/* <Grid item xs={12} md={12} lg={12}>
+              <MDBox> {renderCharts(sensorGroup1)} </MDBox>
+            </Grid> */}
             <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
-                <MDBox> {renderCharts(4)} </MDBox>
+                <MDBox> {renderCharts(sensorGroup2)} </MDBox>
               </MDBox>
             </Grid>
           </Grid>
