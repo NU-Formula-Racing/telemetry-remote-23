@@ -54,7 +54,7 @@ function AutoLineChart({ color, titles, scale }) {
       }
 
       let sumOfValue = 0;
-      for (let i = 0; i < 1; i += 1) {
+      for (let i = 0; i < titles.length; i += 1) {
         if (titles[i] in sensorData) {
           // store values for description of the chart (average value)
           const dataEntry = sensorData[titles[i]];
@@ -72,22 +72,8 @@ function AutoLineChart({ color, titles, scale }) {
           }
           // append new data to chart
           chart.data.datasets[i].label = titles[i];
-          chart.data.datasets[i].data.push(lastDataValue);
-          console.log(`pushing data for ${titles[i]} w/ value ${lastDataValue}`);
-          console.log(
-            `array 0:\n ${util.inspect(chart.data.datasets[0].data, {
-              showHidden: false,
-              depth: null,
-              colors: true,
-            })}`
-          );
-          console.log(
-            `array 1:\n ${util.inspect(chart.data.datasets[1].data, {
-              showHidden: false,
-              depth: null,
-              colors: true,
-            })}`
-          );
+          chart.data.datasets[i].data = [...chart.data.datasets[i].data, lastDataValue];
+
           // labels are shared across all datasets
           if (chart.data.labels.length < chart.data.datasets[i].data.length) {
             chart.data.labels.push(lastDataTime);
@@ -99,17 +85,16 @@ function AutoLineChart({ color, titles, scale }) {
           }
         }
       }
-      // console.log(titles);
-      // console.log(sensorData[titles[0]]);
-      // console.log(sensorData[titles[1]]);
-      // console.log(
-      //   `chart state changed:\n ${util.inspect(chart.data.datasets, {
-      //     showHidden: false,
-      //     depth: null,
-      //     colors: true,
-      //   })}`
-      // );
-
+      const debug = false;
+      if (debug) {
+        console.log(
+          `chart state changed:\n ${util.inspect(chart.data.datasets, {
+            showHidden: false,
+            depth: null,
+            colors: true,
+          })}`
+        );
+      }
       setDescription(sumOfValue / titles.length);
       chart.update();
     }

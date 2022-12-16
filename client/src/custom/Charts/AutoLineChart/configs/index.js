@@ -5,51 +5,42 @@ function configs(titles) {
   const [controller] = useMaterialUIController();
   const { darkMode } = controller;
   // FIXME: figure how to change data colors based on dataset
-  // const datasetList = titles.map((title) => ({
-  //   label: title,
-  //   tension: 0,
-  //   pointRadius: 0,
-  //   pointBorderColor: "transparent",
-  //   pointBackgroundColor: "transparent",
-  //   borderColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
-  //   borderWidth: 2,
-  //   backgroundColor: "transparent",
-  //   fill: true,
-  //   data: [],
-  //   maxBarThickness: 6,
-  // }));
+
+  const darkModeColors = [
+    // 03a9f4,
+    "rgba(179, 136, 255, 1)",
+    "rgba(130, 177, 255, 1)",
+    "rgba(3, 218, 198, 1)",
+    "rgba(207, 102, 121, 1)",
+  ];
+  const lightModeColors = [
+    "rgba(156, 39, 176, 1)",
+    "rgba(233, 30, 99, 1)",
+    "rgba(0, 188, 212, 1)",
+    "rgba(33, 150, 243, 1)",
+  ];
+
+  const datasetList = titles.map((title, i) => {
+    const color = darkMode ? darkModeColors[i % 4] : lightModeColors[i % 4];
+    return {
+      label: title,
+      tension: 0,
+      pointRadius: 0,
+      pointBorderColor: color,
+      pointBackgroundColor: color,
+      borderColor: color,
+      borderWidth: 2,
+      backgroundColor: "transparent",
+      fill: true,
+      data: [],
+      maxBarThickness: 6,
+    };
+  });
 
   return {
     data: {
       labels: [],
-      datasets: [
-        {
-          label: titles[0],
-          tension: 0,
-          pointRadius: 0,
-          pointBorderColor: "transparent",
-          pointBackgroundColor: "transparent",
-          borderColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
-          borderWidth: 2,
-          backgroundColor: "transparent",
-          fill: true,
-          data: [],
-          maxBarThickness: 6,
-        },
-        {
-          label: titles[1],
-          tension: 0,
-          pointRadius: 0,
-          pointBorderColor: "transparent",
-          pointBackgroundColor: "transparent",
-          borderColor: darkMode ? "rgba(227, 177, 250, .8)" : "rgba(225, 225, 225, .8)",
-          borderWidth: 2,
-          backgroundColor: "transparent",
-          fill: true,
-          data: [],
-          maxBarThickness: 6,
-        },
-      ],
+      datasets: datasetList,
     },
     options: {
       animation: {
