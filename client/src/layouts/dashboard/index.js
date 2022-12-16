@@ -10,17 +10,51 @@ import { useMaterialUIController } from "context";
 // Material Dashboard 2 React example components
 import DashboardLayout from "custom/LayoutContainers/DashboardLayout";
 import NavBar from "custom/Navbar";
-import DefaultLineChart from "custom/Charts/DefaultLineChart";
+// import DefaultLineChart from "custom/Charts/DefaultLineChart";
+import AutoLineChart from "custom/Charts/AutoLineChart";
 import StatisticsCard from "custom/Cards/StatisticsCard";
 
 // Data
-import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
+// import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
 
 // Dashboard components
 function Dashboard() {
-  const { sales, tasks } = reportsLineChartData;
+  // const { tasks } = reportsLineChartData;
   const [controller] = useMaterialUIController();
-  const { darkMode } = controller;
+  const { darkMode, sensorData } = controller;
+  const sensorNames = Object.keys(sensorData);
+
+  const renderCharts = (i) => {
+    const chartProps = {
+      color: darkMode ? "dark" : "info",
+      title: sensorNames.length > i ? sensorNames[i] : "Undefined",
+      scale: 50,
+    };
+    const { color, title, scale } = chartProps;
+    return <AutoLineChart color={color} title={title} scale={scale} />;
+  };
+
+  const renderCards = (i) => {
+    const valid = sensorNames.length > i;
+    const cardProps = {
+      color: "dark",
+      title: "Undefined",
+      count: "Undefined",
+      percentage: { color: "info", amount: 50 },
+    };
+    if (valid) {
+      cardProps.title = sensorNames[i];
+      const dataEntry = sensorData[sensorNames[i]];
+      const lastData = dataEntry[1][dataEntry[1].length - 1];
+      cardProps.count = lastData;
+      cardProps.percentage.amount = lastData;
+      if (lastData >= 50) cardProps.percentage.color = "success";
+      else if (lastData <= 25) cardProps.percentage.color = "error";
+      else cardProps.percentage.color = "warning";
+    }
+    const { color, title, count, percentage } = cardProps;
+    return <StatisticsCard color={color} title={title} count={count} percentage={percentage} />;
+  };
 
   return (
     <DashboardLayout>
@@ -29,94 +63,27 @@ function Dashboard() {
         <MDBox>
           <Grid container spacing={3}>
             <Grid item xs={12} md={12} lg={12}>
-              <MDBox>
-                <DefaultLineChart
-                  color={darkMode ? "dark" : "info"}
-                  title="Wheel Speed"
-                  description={
-                    <>
-                      <strong>500</strong> rpm
-                    </>
-                  }
-                  chart={sales}
-                />
-              </MDBox>
+              <MDBox> {renderCharts(0)} </MDBox>
             </Grid>
             <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
-                <DefaultLineChart
-                  color={darkMode ? "dark" : "info"}
-                  title="Brake Pressure"
-                  description={
-                    <>
-                      <strong>90</strong> Units
-                    </>
-                  }
-                  chart={tasks}
-                />
+                <MDBox> {renderCharts(1)} </MDBox>
               </MDBox>
             </Grid>
           </Grid>
         </MDBox>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <StatisticsCard
-                color="dark"
-                icon="weekend"
-                title="FR Brake Temp"
-                count={88}
-                percentage={{
-                  color: "success",
-                  amount: "+55%",
-                  label: "than lask week",
-                }}
-              />
-            </MDBox>
+            <MDBox mb={1.5}> {renderCards(0)} </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <StatisticsCard
-                icon="leaderboard"
-                title="FL Brake Temp"
-                count={87}
-                percentage={{
-                  color: "success",
-                  amount: "+3%",
-                  label: "than last month",
-                }}
-              />
-            </MDBox>
+            <MDBox mb={1.5}> {renderCards(1)} </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <StatisticsCard
-                color="success"
-                icon="store"
-                title="BR Brake Temp"
-                count={87}
-                percentage={{
-                  color: "success",
-                  amount: "+1%",
-                  label: "than yesterday",
-                }}
-              />
-            </MDBox>
+            <MDBox mb={1.5}> {renderCards(2)} </MDBox>
           </Grid>
           <Grid item xs={12} md={6} lg={3}>
-            <MDBox mb={1.5}>
-              <StatisticsCard
-                color="primary"
-                icon="person_add"
-                title="BL Brake Temp"
-                count={90}
-                percentage={{
-                  color: "success",
-                  amount: "",
-                  label: "Just updated",
-                }}
-              />
-            </MDBox>
+            <MDBox mb={1.5}> {renderCards(3)} </MDBox>
           </Grid>
         </Grid>
       </MDBox>

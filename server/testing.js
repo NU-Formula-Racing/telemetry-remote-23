@@ -27,22 +27,21 @@ function sendFakeData(socket, dataRepo, origin, sessionID=0) {
   }
   // send data to client
   console.log("DataObj sending to client @ t=", curTime);
+  console.log(`\t${C.SENSOR_NAMES[0]}: ${dataObj[C.SENSOR_NAMES[0]].val}`)
   socket.emit('sendSensorData',  dataObj);
 }
 
 
 function getSmoothNumber(n) {
-  const scale = 3;
+  const scale = 10;
   const lowerBound = 0;
   const upperBound = 100;
 
   let difference = Math.floor(Math.random() * scale) - Math.floor(Math.random() * scale);
-  if (n + difference < lowerBound) {
-    difference = scale * 2;
+  if ((n + difference < lowerBound) || (n + difference > upperBound)) {
+    difference *= -1;
   }
-  if (n + difference > upperBound) {
-    difference = - scale * 2;
-  }
+
   return n + difference;
 }
 

@@ -1,9 +1,12 @@
 // TODO:
 // 1. Hook up data to display (store data in state using context? pass in range as props?)
-//     store data in global state, component use name and index to access data
-//    a. hook up 8 sensors to graphs (overlap?)
-//        i. display average on the title of the graph
-//    b. hook up 4 sensors to stats
+//     a. stop the graph from bouncing up
+//     b. need to round the seconds down (how to limit the number of labels displayed while maintining resolution)
+//     ba. add vertical line to show where the mouse is currently at inside of the
+//     c. adjust scale and width
+//     d. add the scroll bar on the bottom
+//     e. render multiple/all gaphs
+//     f. multiple dashboards?
 // 2. make sure the right props are passed (no static img/data)
 // 3. make scroll box for graphs ?
 // 4. make multiple dashboards
@@ -32,7 +35,7 @@ import themeDark from "assets/theme-dark";
 import routes from "routes";
 
 // Material Dashboard 2 React contexts
-import { useMaterialUIController, setSensorData, setNewSensorData } from "context";
+import { useMaterialUIController, initSensorData, appendSensorData } from "context";
 
 // Images
 import brandWhite from "assets/images/F1-logo.png";
@@ -53,7 +56,8 @@ export default function App() {
   const [onInitData, setOnInitData] = useState(false);
   const { pathname } = useLocation();
 
-  const handleNewSensor = (res) => setSensorData(dispatch, res);
+  const handleInitSensorData = (res) => initSensorData(dispatch, res);
+  const handleAppendSensorData = (res) => appendSensorData(dispatch, res);
 
   // called right after the first render completes
   // fetch init sensor data from server
@@ -61,16 +65,18 @@ export default function App() {
     console.log("Component mounted. Fetching sensor data...");
     socket.emit("getSensors", (res) => {
       console.log("getSensors socket response: ", res);
-      handleNewSensor(res);
+      handleInitSensorData(res);
     });
   }, []);
 
-  const debug = true;
+  const debug = false;
   // called when sensorData state changes
   useEffect(() => {
-    if (debug) {
+    if (debug && Object.keys(sensorData).length > 0) {
+      const k = Object.keys(sensorData)[0];
+      const data = sensorData[k];
       console.log(
-        `sensorData state changed:\n ${util.inspect(sensorData, {
+        `sensorData state changed:\n ${util.inspect(data, {
           showHidden: false,
           depth: null,
           colors: true,
@@ -94,7 +100,7 @@ export default function App() {
           };
           // all data is stored into global context
           // mapping from sensor name to list of dataObj
-          setNewSensorData(dispatch, dataObj);
+          handleAppendSensorData(dataObj);
         });
       }
     });

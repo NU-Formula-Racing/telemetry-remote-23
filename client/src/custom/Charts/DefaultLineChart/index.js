@@ -62,7 +62,7 @@ function DefaultLineChart({ color, title, description, chart }) {
 // Setting default values for the props of LineChart
 DefaultLineChart.defaultProps = {
   color: "dark",
-  description: "",
+  description: "No description provided",
 };
 
 // Typechecking props for the LineChart

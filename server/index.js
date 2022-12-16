@@ -94,7 +94,8 @@ sessionRepo.createTable()
       socket.on('getSensors', (callback) => {
         initValues = {}
         for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
-          initValues[C.SENSORS[i].name] = [{ val: 0.01, time: 0.01 }];
+          // charts need 1 array per axis on graph
+          initValues[C.SENSORS[i].name] = [[0.01], [0.01]];
         }
         callback(initValues);
       });

@@ -42,17 +42,24 @@ function reducer(state, action) {
     case "DARKMODE": {
       return { ...state, darkMode: action.value };
     }
-    case "SENSOR_DATA": {
+    case "INIT_SENSOR_DATA": {
       // should populate as a dict mapping from names to lists of data
       // console.log("SENSOR_DATA", action.value);
       return { ...state, sensorData: action.value };
     }
-    case "ADD_NEW_SENSOR_DATA": {
+    case "APPEND_SENSOR_DATA": {
       // adds a single data point for a single sensor
       const { name, data } = action.value;
       return {
         ...state,
-        sensorData: { ...state.sensorData, [name]: [...state.sensorData[name], data] },
+        sensorData: {
+          ...state.sensorData,
+          [name]: [
+            // FIXME: cant just floor everything here
+            [...state.sensorData[name][0], Math.floor(data.time)],
+            [...state.sensorData[name][1], data.val],
+          ],
+        },
       };
     }
     default: {
@@ -112,8 +119,8 @@ const setOpenConfigurator = (dispatch, value) => dispatch({ type: "OPEN_CONFIGUR
 const setDirection = (dispatch, value) => dispatch({ type: "DIRECTION", value });
 const setLayout = (dispatch, value) => dispatch({ type: "LAYOUT", value });
 const setDarkMode = (dispatch, value) => dispatch({ type: "DARKMODE", value });
-const setSensorData = (dispatch, value) => dispatch({ type: "SENSOR_DATA", value });
-const setNewSensorData = (dispatch, value) => dispatch({ type: "ADD_NEW_SENSOR_DATA", value });
+const initSensorData = (dispatch, value) => dispatch({ type: "INIT_SENSOR_DATA", value });
+const appendSensorData = (dispatch, value) => dispatch({ type: "APPEND_SENSOR_DATA", value });
 
 export {
   MaterialUIControllerProvider,
@@ -128,6 +135,6 @@ export {
   setDirection,
   setLayout,
   setDarkMode,
-  setSensorData,
-  setNewSensorData,
+  initSensorData,
+  appendSensorData,
 };

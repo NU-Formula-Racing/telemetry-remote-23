@@ -28,7 +28,7 @@ import MDTypography from "components/MDTypography";
 import MDProgress from "components/MDProgress";
 import image from "assets/images/front-right-wheel.png";
 
-function StatisticsCard({ color, title, count }) {
+function StatisticsCard({ color, title, count, percentage }) {
   return (
     <Card>
       <MDBox display="flex" justifyContent="space-between" pt={1} pr={2}>
@@ -71,10 +71,10 @@ function StatisticsCard({ color, title, count }) {
       <MDBox pb={2} px={2}>
         <MDBox display="flex" alignItems="center" justifyContent="flex-end">
           <MDTypography variant="caption" color="text" fontWeight="medium">
-            {80}%
+            {percentage.amount}%
           </MDTypography>
           <MDBox ml={0.5} width="9em">
-            <MDProgress variant="gradient" color="info" value={80} />
+            <MDProgress variant="gradient" color={percentage.color} value={percentage.amount} />
           </MDBox>
         </MDBox>
       </MDBox>
@@ -87,6 +87,7 @@ StatisticsCard.defaultProps = {
   color: "info",
   percentage: {
     color: "success",
+    amount: 0,
     text: "",
     label: "",
   },
@@ -117,7 +118,7 @@ StatisticsCard.propTypes = {
       "dark",
       "white",
     ]),
-    amount: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+    amount: PropTypes.number,
     label: PropTypes.string,
   }),
   // icon: PropTypes.node.isRequired,
