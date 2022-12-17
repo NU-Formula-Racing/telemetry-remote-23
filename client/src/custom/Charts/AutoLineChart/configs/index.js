@@ -1,5 +1,6 @@
 // Material Dashboard 2 React contexts
 import { useMaterialUIController } from "context";
+// import "chartjs-plugin-zoom";
 
 function configs(titles) {
   const [controller] = useMaterialUIController();
@@ -25,6 +26,8 @@ function configs(titles) {
     return {
       label: title,
       tension: 0,
+      stepped: false,
+      borderDash: [],
       pointRadius: 0,
       pointBorderColor: color,
       pointBackgroundColor: color,
@@ -43,14 +46,32 @@ function configs(titles) {
       datasets: datasetList,
     },
     options: {
-      animation: {
-        duration: 0,
-      },
+      animation: false,
+      normalized: true,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
           display: false,
+        },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: "x",
+          },
+          limits: {
+            x: {
+              minRange: 10,
+            },
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+              mode: "x",
+              speed: "0.1",
+            },
+            mode: "x",
+          },
         },
       },
       interaction: {
@@ -59,6 +80,9 @@ function configs(titles) {
       },
       scales: {
         y: {
+          type: "linear",
+          // min: 0,
+          // max: 100,
           grid: {
             drawBorder: false,
             display: true,
@@ -83,15 +107,18 @@ function configs(titles) {
         x: {
           grid: {
             drawBorder: false,
-            display: true,
+            display: false,
             drawOnChartArea: false,
-            drawTicks: true,
-            borderDash: [5, 5],
+            drawTicks: false,
           },
           ticks: {
-            display: false,
+            display: true,
             color: "#f8f9fa",
-            padding: 10,
+            padding: 5,
+            maxRotation: 0,
+            minRotation: 0,
+            maxTicksLimit: 10,
+            autoSkip: true,
             font: {
               size: 14,
               weight: 300,

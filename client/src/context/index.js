@@ -56,7 +56,7 @@ function reducer(state, action) {
           ...state.sensorData,
           [name]: [
             // FIXME: cant just floor everything here
-            [...state.sensorData[name][0], Math.floor(data.time)],
+            [...state.sensorData[name][0], Math.floor(data.time * 10) / 10],
             [...state.sensorData[name][1], data.val],
           ],
         },

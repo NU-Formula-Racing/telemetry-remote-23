@@ -14,9 +14,6 @@ import NavBar from "custom/Navbar";
 import AutoLineChart from "custom/Charts/AutoLineChart";
 import StatisticsCard from "custom/Cards/StatisticsCard";
 
-// Data
-// import reportsLineChartData from "layouts/dashboard/data/reportsLineChartData";
-
 // Dashboard components
 function Dashboard() {
   // const { tasks } = reportsLineChartData;

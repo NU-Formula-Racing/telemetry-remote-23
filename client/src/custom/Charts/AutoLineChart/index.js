@@ -5,6 +5,8 @@ import PropTypes from "prop-types";
 
 // react-chartjs-2 components
 import { Line } from "react-chartjs-2";
+import { Chart as ChartJS } from "chart.js";
+import zoomPlugin from "chartjs-plugin-zoom";
 
 // Material Dashboard 2 React contexts
 import { useMaterialUIController } from "context";
@@ -21,6 +23,8 @@ import configs from "custom/Charts/AutoLineChart/configs";
 
 // util for inspecting objects for debugging
 import util from "util";
+
+ChartJS.register(zoomPlugin);
 
 const parseName = (str) => {
   if (!str || str.indexOf("_") === -1) {
