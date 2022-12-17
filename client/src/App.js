@@ -1,7 +1,5 @@
 // TODO:
-// 1. multiple lines per graph
-// 2. optimize performance
-// 3. make scroll box for graphs
+// 1. scroll box + pan? + extract to helper root?
 // 4. adjust style (thinner graphs, display axis on last?)
 // 4. make multiple dashboards
 // 5. focus on funtionality, then style

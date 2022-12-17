@@ -61,16 +61,21 @@ function configs(titles) {
           },
           limits: {
             x: {
-              minRange: 10,
+              min: 0,
+              max: 1000,
+              minRange: 30,
             },
           },
           zoom: {
             wheel: {
               enabled: true,
               mode: "x",
-              speed: "0.1",
+              speed: 0.1,
             },
             mode: "x",
+            speed: 0.1,
+            threshold: 2,
+            sensitivity: 3,
           },
         },
       },
