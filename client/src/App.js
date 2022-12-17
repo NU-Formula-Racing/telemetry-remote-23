@@ -66,7 +66,7 @@ export default function App() {
   manager.on("error", (e) => {
     openErrorSB();
     setToastMsg(e.message);
-    console.log(e);
+    // console.log(e);
   });
 
   const renderErrorSB = (

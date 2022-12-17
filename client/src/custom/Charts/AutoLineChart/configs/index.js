@@ -58,11 +58,21 @@ function configs(titles) {
           pan: {
             enabled: true,
             mode: "x",
+            scaleMode: "x",
+            // onPan: ({ chart }) => {
+            // console.log(`panning`);
+            // console.log(`min max: ${chart.scales.x.min} ${chart.scales.x.max}`);
+            // },
+            onPanComplete: ({ chart }) => {
+              chart.update();
+              console.log(`pan complete`);
+              console.log(`min max: ${chart.scales.x.min} ${chart.scales.x.max}`);
+            },
           },
           limits: {
             x: {
               min: 0,
-              max: 1000,
+              max: "original",
               minRange: 30,
             },
           },
@@ -74,8 +84,8 @@ function configs(titles) {
             },
             mode: "x",
             speed: 0.1,
-            threshold: 2,
-            sensitivity: 3,
+            // threshold: 2,
+            // sensitivity: 3,
           },
         },
       },

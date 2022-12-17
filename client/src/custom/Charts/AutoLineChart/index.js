@@ -43,7 +43,7 @@ function AutoLineChart({ color, titles, scale }) {
   const { data, options } = configs(titles);
   const [chartData] = useState(data);
   const chartRef = useRef();
-
+  // runs everytime websocket event is received
   useEffect(() => {
     // check if sensor data has been initialized and loaded from ws
     if (!chartData) {
@@ -83,9 +83,18 @@ function AutoLineChart({ color, titles, scale }) {
             chart.data.labels.push(lastDataTime);
           }
           // adjust chart scale as needed
+
+          // FIXME: HERE
+          // unrenders itself if data is too old, need to dynamically fetch data and rerender
+          // no problem when all data is rendered
+
           if (chartDataLength > scale) {
-            chart.data.labels.shift();
-            chart.data.datasets[i].data.shift();
+            // chart.data.labels.shift();
+            // chart.data.datasets[i].data.shift();
+            chart.options.scales.x.min = chart.data.labels[chartDataLength - scale];
+            // if (chartDataLength < scale) {
+            //   console.log("k");
+            // }
           }
         }
       }
