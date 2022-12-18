@@ -33,6 +33,12 @@ const parseName = (str) => {
   const firstUnderscore = str.indexOf("_");
   return str.slice(firstUnderscore + 1);
 };
+
+// use state to keep track if panning or zooming, stop the use effect
+// make function to pass into the config
+// dynamically pass in the data
+// need access to state, need to be in side of the component
+
 function AutoLineChart({ color, titles, scale }) {
   const [controller] = useMaterialUIController();
   const { sensorData, dataReceived } = controller;
@@ -41,8 +47,10 @@ function AutoLineChart({ color, titles, scale }) {
   // titles guaranteed to be non-empty
   const chartName = parseName(titles[0]);
   const { data, options } = configs(titles);
+  // stores data object for individual charts
   const [chartData] = useState(data);
   const chartRef = useRef();
+
   // runs everytime websocket event is received
   useEffect(() => {
     // check if sensor data has been initialized and loaded from ws
@@ -50,6 +58,7 @@ function AutoLineChart({ color, titles, scale }) {
       console.log("chartData is undefined");
       return;
     }
+
     if (sensorNames.length > 0) {
       const { current: chart } = chartRef;
       if (!chart) {
@@ -82,8 +91,6 @@ function AutoLineChart({ color, titles, scale }) {
           if (chart.data.labels.length < chart.data.datasets[i].data.length) {
             chart.data.labels.push(lastDataTime);
           }
-          // adjust chart scale as needed
-
           // FIXME: HERE
           // unrenders itself if data is too old, need to dynamically fetch data and rerender
           // no problem when all data is rendered
@@ -92,6 +99,7 @@ function AutoLineChart({ color, titles, scale }) {
             // chart.data.labels.shift();
             // chart.data.datasets[i].data.shift();
             chart.options.scales.x.min = chart.data.labels[chartDataLength - scale];
+            // setRange({ start: chart.data.labels[chartDataLength - scale], end: range.end });
             // if (chartDataLength < scale) {
             //   console.log("k");
             // }

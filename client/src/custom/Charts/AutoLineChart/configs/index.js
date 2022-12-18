@@ -54,40 +54,6 @@ function configs(titles) {
         legend: {
           display: false,
         },
-        zoom: {
-          pan: {
-            enabled: true,
-            mode: "x",
-            scaleMode: "x",
-            // onPan: ({ chart }) => {
-            // console.log(`panning`);
-            // console.log(`min max: ${chart.scales.x.min} ${chart.scales.x.max}`);
-            // },
-            onPanComplete: ({ chart }) => {
-              chart.update();
-              console.log(`pan complete`);
-              console.log(`min max: ${chart.scales.x.min} ${chart.scales.x.max}`);
-            },
-          },
-          limits: {
-            x: {
-              min: 0,
-              max: "original",
-              minRange: 30,
-            },
-          },
-          zoom: {
-            wheel: {
-              enabled: true,
-              mode: "x",
-              speed: 0.1,
-            },
-            mode: "x",
-            speed: 0.1,
-            // threshold: 2,
-            // sensitivity: 3,
-          },
-        },
       },
       interaction: {
         intersect: false,
@@ -149,3 +115,67 @@ function configs(titles) {
 }
 
 export default configs;
+
+/**
+*   for mouse panning and zoom wheel can use plugin
+*   https://www.chartjs.org/chartjs-plugin-zoom/latest/guide/options.html
+*   solution: adjust scale and not data array when scaling normally
+*   bug: when zooming out and panning left, chart will disappear
+*   scale bounds go crazy if pan too much to left side
+*   zoom keeps getting reset to max zoom if zoom out too much
+*   pan zoom misbehaves at around the same index
+*   hypothesis: graph on the left does not remain rendered even if data is present in array
+*   also possible to have something to do with useMemo. Not sure tho
+*   possible fix: use onPan/onZoom to update and redraw the chart
+*   current code: zoom and pan works on small scale movements:
+*   in component file add:
+        import zoomPlugin from "chartjs-plugin-zoom";
+        Chart.register(zoomPlugin);
+*   in config file under options.plugins add:
+      zoom: {
+          pan: {
+            enabled: true,
+            mode: "x",
+            scaleMode: "x",
+            // onPan: ({ chart }) => {
+            // console.log(`panning`);
+            // console.log(`min max: ${chart.scales.x.min} ${chart.scales.x.max}`);
+            // },
+            onPanComplete: ({ chart }) => {
+              // chart.update();
+              const { min, max } = chart.scales.x;
+              if (min >= max) {
+                console.log(`%cEP: ${chart.scales.x.min} ${chart.scales.x.max}`, "color: red;");
+              } else {
+                console.log(`PP: ${chart.scales.x.min} ${chart.scales.x.max}`);
+              }
+            },
+          },
+          limits: {
+            x: {
+              min: 0,
+              max: "original",
+              minRange: 20,
+            },
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+              mode: "x",
+              speed: 0.1,
+            },
+            mode: "x",
+            speed: 0.1,
+            onZoomComplete: ({ chart }) => {
+              // chart.update();
+              const { min, max } = chart.scales.x;
+              if (min >= max) {
+                console.log(`%cEZ: ${chart.scales.x.min} ${chart.scales.x.max}`, "color: red;");
+              } else {
+                console.log(`ZZ: ${chart.scales.x.min} ${chart.scales.x.max}`);
+              }
+            },
+          },
+        },
+      },
+*/
