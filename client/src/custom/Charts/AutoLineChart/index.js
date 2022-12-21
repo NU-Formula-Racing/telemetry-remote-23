@@ -17,12 +17,16 @@ import Card from "@mui/material/Card";
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
 import MDTypography from "components/MDTypography";
+import MDSnackbar from "components/MDSnackbar";
 
 // LineChart configurations
 import configs from "custom/Charts/AutoLineChart/configs";
 
 // util for inspecting objects for debugging
 import util from "util";
+
+// for keydown event listener
+import useEventListener from "@use-it/event-listener";
 
 ChartJS.register(zoomPlugin);
 
@@ -34,11 +38,6 @@ const parseName = (str) => {
   return str.slice(firstUnderscore + 1);
 };
 
-// use state to keep track if panning or zooming, stop the use effect
-// make function to pass into the config
-// dynamically pass in the data
-// need access to state, need to be in side of the component
-
 function AutoLineChart({ color, titles, scale }) {
   const [controller] = useMaterialUIController();
   const { sensorData, dataReceived } = controller;
@@ -49,76 +48,231 @@ function AutoLineChart({ color, titles, scale }) {
   const { data, options } = configs(titles);
   // stores data object for individual charts
   const [chartData] = useState(data);
+  const [isZoomPan, setZoomPan] = useState(false);
+  const [range, setRange] = useState({ start: 0, end: 0 });
   const chartRef = useRef();
+  // takes cares of toast
+  const [warningSB, setWarningSB] = useState(false);
+  const [toastMsg, setToastMsg] = useState({ title: "error message", content: "error message" });
+  const openWarningSB = () => setWarningSB(true);
+  const closeWarningSB = () => setWarningSB(false);
+
+  const renderWarningSB = (
+    <MDSnackbar
+      color="warning"
+      icon="star"
+      title={toastMsg.title}
+      content={toastMsg.content}
+      dateTime="now"
+      open={warningSB}
+      onClose={closeWarningSB}
+      close={closeWarningSB}
+      bgWhite
+    />
+  );
+
+  function renderSB(title, content) {
+    setToastMsg({ title, content });
+    openWarningSB();
+  }
+
+  // listen to key presses (auto mount/unmount)
+  function handler({ key }) {
+    if (!chartData) {
+      console.log("chartData is undefined");
+      renderSB("cannot zoom/pan", "chart data is undefined");
+      return;
+    }
+    if (sensorNames.length <= 0) {
+      console.log("websocket offline. no sensor detected");
+      renderSB("cannot zoom/pan", "websocket offline. no sensor detected");
+      return;
+    }
+    const { current: chart } = chartRef;
+    if (!chart) {
+      console.log(`chart is undefined for ${chartName}`);
+      renderSB("cannot zoom/pan", `chart is undefined for ${chartName}`);
+      return;
+    }
+    // don't allow pan/zoom if has less data than minrange
+    const MIN_RANGE = 10;
+    if (sensorData[titles[0]][0].length < MIN_RANGE) {
+      console.log("not enough data to pan/zoom");
+      renderSB("cannot zoom/pan", "not enough data to pan/zoom");
+      return;
+    }
+    // a,d to pan
+    // w,s to zoom
+    // q,e to select range
+    // capital letters to zoom quicker
+    // currently zoom and pans all charts, need prop or context to differentiate
+    // extract this into util file?
+
+    const setDataToRange = () => {
+      const { start, end } = range;
+      const labels = sensorData[titles[0]][0].slice(start, end);
+      const datasets = chart.data.datasets.map((dataset, index) => {
+        const newData = sensorData[titles[index]][1].slice(start, end);
+        return { ...dataset, data: newData };
+      });
+      chart.data = { labels, datasets };
+      chart.update();
+    };
+
+    const moveRange = (amount) => {
+      const { start, end } = range;
+      let { leftAmount, rightAmount } = amount;
+      if (start + leftAmount < 0) {
+        leftAmount = -start;
+      }
+      if (end + rightAmount > sensorData[titles[0]][0].length) {
+        rightAmount = sensorData[titles[0]][0].length - end;
+      }
+      if (end + rightAmount - start - leftAmount < MIN_RANGE) {
+        // if have time can implement precise zoom to min range
+        return;
+      }
+      setRange({ start: start + leftAmount, end: end + rightAmount });
+    };
+
+    function handleZoomPan(leftAmount, rightAmount) {
+      setZoomPan(true);
+      moveRange({ leftAmount, rightAmount });
+      setDataToRange();
+    }
+
+    const small = 2;
+    const large = 5;
+    switch (key) {
+      // zoom in
+      case "w":
+        handleZoomPan(small, -small);
+        break;
+      // zoom out
+      case "s":
+        handleZoomPan(-small, small);
+        break;
+      // pan left
+      case "a":
+        handleZoomPan(-small, -small);
+        break;
+      // pan right
+      case "d":
+        handleZoomPan(small, small);
+        break;
+      case "W":
+        handleZoomPan(large, -large);
+        break;
+      case "S":
+        handleZoomPan(-large, large);
+        break;
+      case "A":
+        handleZoomPan(-large, -large);
+        break;
+      case "D":
+        handleZoomPan(large, large);
+        break;
+      case "R":
+        const lastIndex = sensorData[titles[0]][0].length;
+        setRange({ start: lastIndex - scale, end: lastIndex });
+        setDataToRange();
+        setZoomPan(false);
+        break;
+      default:
+        break;
+    }
+  }
+  useEventListener("keydown", handler);
+
+  useEffect(() => {
+    const { start, end } = range;
+    console.log(`range: ${start} - ${end}`);
+  }, [range]);
+
+  function onZoomPan({ chart }) {
+    console.log(chart);
+    setZoomPan(true);
+  }
 
   // runs everytime websocket event is received
   useEffect(() => {
     // check if sensor data has been initialized and loaded from ws
     if (!chartData) {
       console.log("chartData is undefined");
+      renderSB(`${chartName} error`, "chart data is undefined");
+      return;
+    }
+    if (sensorNames.length < 0) {
+      console.log("websocket offline. no sensor detected");
+      renderSB(`${chartName} error`, "websocket offline. no sensor detected");
+      return;
+    }
+    const { current: chart } = chartRef;
+    if (!chart) {
+      console.log(`chart is undefined for ${chartName}`);
+      renderSB(`${chartName} error`, `chart is undefined for ${chartName}`);
       return;
     }
 
-    if (sensorNames.length > 0) {
-      const { current: chart } = chartRef;
-      if (!chart) {
-        console.log(`chart is undefined for ${chartName}`);
-        return;
-      }
+    if (isZoomPan) {
+      console.log("zoom/pan is active. stop receiving data");
+      return;
+    }
 
-      let sumOfValue = 0;
-      for (let i = 0; i < titles.length; i += 1) {
-        if (titles[i] in sensorData) {
-          // store values for description of the chart (average value)
-          const dataEntry = sensorData[titles[i]];
-          const lastIndex = dataEntry[1].length - 1;
-          sumOfValue += dataEntry[1][lastIndex];
-          // compare incoming data with last known chart data
-          const chartDataLength = chart.data.datasets[i].data.length;
-          const lastChartDataTime = chart.data.labels[chartDataLength - 1];
-          const lastChartDataValue = chart.data.datasets[i].data[chartDataLength - 1];
-          const lastDataTime = dataEntry[0][lastIndex];
-          const lastDataValue = dataEntry[1][lastIndex];
-          // prevent displaying dupliacte data (sensorData updated multiple times per websocket emit)
-          if (lastChartDataTime === lastDataTime && lastChartDataValue === lastDataValue) {
-            return;
-          }
-          // append new data to chart
-          chart.data.datasets[i].label = titles[i];
-          chart.data.datasets[i].data = [...chart.data.datasets[i].data, lastDataValue];
+    chart.options.plugins.zoom.zoom.onZoom = onZoomPan;
+    chart.options.plugins.zoom.pan.onPan = onZoomPan;
 
-          // labels are shared across all datasets
-          if (chart.data.labels.length < chart.data.datasets[i].data.length) {
-            chart.data.labels.push(lastDataTime);
-          }
-          // FIXME: HERE
-          // unrenders itself if data is too old, need to dynamically fetch data and rerender
-          // no problem when all data is rendered
+    let sumOfValue = 0;
+    for (let i = 0; i < titles.length; i += 1) {
+      if (titles[i] in sensorData) {
+        // store values for description of the chart (average value)
+        const dataEntry = sensorData[titles[i]];
+        const lastIndex = dataEntry[1].length - 1;
+        sumOfValue += dataEntry[1][lastIndex];
+        // compare incoming data with last known chart data
+        const chartDataLength = chart.data.datasets[i].data.length;
+        const lastChartDataTime = chart.data.labels[chartDataLength - 1];
+        const lastChartDataValue = chart.data.datasets[i].data[chartDataLength - 1];
+        const lastDataTime = dataEntry[0][lastIndex];
+        const lastDataValue = dataEntry[1][lastIndex];
+        // prevent displaying dupliacte data (sensorData updated multiple times per websocket emit)
+        if (lastChartDataTime === lastDataTime && lastChartDataValue === lastDataValue) {
+          return;
+        }
+        // append new data to chart
+        chart.data.datasets[i].label = titles[i];
+        chart.data.datasets[i].data = [...chart.data.datasets[i].data, lastDataValue];
+        // labels are shared across all datasets
+        if (chart.data.labels.length < chart.data.datasets[i].data.length) {
+          chart.data.labels.push(lastDataTime);
+        }
 
-          if (chartDataLength > scale) {
-            // chart.data.labels.shift();
-            // chart.data.datasets[i].data.shift();
-            chart.options.scales.x.min = chart.data.labels[chartDataLength - scale];
-            // setRange({ start: chart.data.labels[chartDataLength - scale], end: range.end });
-            // if (chartDataLength < scale) {
-            //   console.log("k");
-            // }
+        const { start, end } = range;
+        if (chartDataLength > scale) {
+          chart.data.datasets[i].data.shift();
+          // shift scales if can fix mouse pan zoom
+          // chart.options.scales.x.min = chart.data.labels[chartDataLength - scale];
+          if (i === titles.length - 1) {
+            chart.data.labels.shift();
+            setRange({ start: start + 1, end: end + 1 });
           }
+        } else if (i === titles.length - 1) {
+          setRange({ start, end: end + 1 });
         }
       }
-      const debug = false;
-      if (debug) {
-        console.log(
-          `chart state changed:\n ${util.inspect(chart.data.datasets, {
-            showHidden: false,
-            depth: null,
-            colors: true,
-          })}`
-        );
-      }
-      setDescription(sumOfValue / titles.length);
-      chart.update();
     }
+    const debug = false;
+    if (debug) {
+      console.log(
+        `chart state changed:\n ${util.inspect(chart.data.datasets, {
+          showHidden: false,
+          depth: null,
+          colors: true,
+        })}`
+      );
+    }
+    setDescription(sumOfValue / titles.length);
+    chart.update();
   }, [dataReceived]);
 
   return (
@@ -157,6 +311,7 @@ function AutoLineChart({ color, titles, scale }) {
           [chartData, color]
         )}
       </MDBox>
+      {renderWarningSB}
     </Card>
   );
 }

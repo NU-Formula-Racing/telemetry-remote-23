@@ -14,9 +14,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
 // Material Dashboard 2 React example components
-import MDSnackbar from "components/MDSnackbar";
-
-// Material Dashboard 2 React example components
 import Sidenav from "custom/Sidenav";
 import Configurator from "custom/Configurator";
 
@@ -35,6 +32,7 @@ import {
   initSensorData,
   appendSensorData,
   setDataReceived,
+  setServerOnline,
 } from "context";
 
 // Images
@@ -47,41 +45,25 @@ import { Manager } from "socket.io-client";
 // util for inspecting objects for debugging
 import util from "util";
 
-const manager = new Manager("http://localhost:3001");
+const manager = new Manager("http://localhost:3001", { autoConnect: true });
 const socket = manager.socket("/");
 
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
   const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData } = controller;
-  // const [onMouseEnter, setOnMouseEnter] = useState(false);
-  const [onInitData, setOnInitData] = useState(false);
+  // const [onMouseEnter, setOnMouseEnter] = useState(false);s
+  const [onInitialize, setOnInitialize] = useState(false);
   const { pathname } = useLocation();
-  // keep track of toast messages
-  const [errorSB, setErrorSB] = useState(false);
-  const [toastMsg, setToastMsg] = useState("error message");
-  const openErrorSB = () => setErrorSB(true);
-  const closeErrorSB = () => setErrorSB(false);
+
+  // have state and display for if server is online
+  // display on navbar. connecting to server. or have like connected
+  // have like red and green indicator. get rid of toasts on app.
 
   // catch connection errors, can be used to print toasts
-  manager.on("error", (e) => {
-    openErrorSB();
-    setToastMsg(e.message);
-    // console.log(e);
-  });
 
-  const renderErrorSB = (
-    <MDSnackbar
-      color="error"
-      icon="warning"
-      title={toastMsg}
-      content="socket.io error. server may not be started."
-      dateTime="now"
-      open={errorSB}
-      onClose={closeErrorSB}
-      close={closeErrorSB}
-      bgWhite
-    />
-  );
+  manager.on("error", (e) => {
+    console.log(e);
+  });
 
   // handle socket responses
   const handleInitSensorData = (res) => initSensorData(dispatch, res);
@@ -113,15 +95,16 @@ export default function App() {
       );
     }
     // if sensorData is not empty, then begin loading data into memory
-    if (Object.keys(sensorData).length > 0 && !onInitData) {
-      setOnInitData(true);
+    if (Object.keys(sensorData).length > 0 && !onInitialize) {
+      setOnInitialize(true);
+      setServerOnline(dispatch, true);
     }
   }, [sensorData]);
 
   // begin receiving real time data once sensorData state initialized
   useEffect(() => {
     socket.on("sendSensorData", (newSensorData) => {
-      if (onInitData) {
+      if (onInitialize) {
         Object.keys(newSensorData).forEach((sensorName) => {
           const dataObj = {
             name: sensorName,
@@ -134,7 +117,7 @@ export default function App() {
         handleSetDataReceived();
       }
     });
-  }, [onInitData]);
+  }, [onInitialize]);
 
   // Setting page scroll to 0 when changing the route
   useEffect(() => {
@@ -172,7 +155,6 @@ export default function App() {
         {getRoutes(routes)}
         <Route path="*" element={<Navigate to="/dashboard" />} />
       </Routes>
-      {renderErrorSB}
     </ThemeProvider>
   );
 }

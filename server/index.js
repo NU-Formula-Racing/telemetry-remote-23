@@ -36,9 +36,9 @@ const { SerialPort } = require("serialport");
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 const dynamoDBHelper = require('./dynamodb.js');
 // imports for SQLite
-const DAO = require('./db/DAO.js')
-const DataRepository = require('./db/DataRepository.js')
-const SessionRepository = require('./db/SessionRepository.js')
+const DAO = require('../db/DAO.js')
+const DataRepository = require('../db/DataRepository.js')
+const SessionRepository = require('../db/SessionRepository.js')
 // imports for custom modules
 const C = require('./constants.js');
 const testing = require('./testing.js');

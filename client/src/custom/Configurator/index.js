@@ -1,18 +1,3 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState, useEffect } from "react";
 
 // @mui material components
@@ -77,7 +62,7 @@ function Configurator() {
   const handleFixedNavbar = () => setFixedNavbar(dispatch, !fixedNavbar);
   const handleDarkMode = () => {
     setDarkMode(dispatch, !darkMode);
-    setSidenavColor(dispatch, darkMode ? "info" : "dark");
+    setSidenavColor(dispatch, darkMode ? "secondary" : "dark");
   };
 
   // sidenav type buttons styles
@@ -124,9 +109,9 @@ function Configurator() {
         px={3}
       >
         <MDBox>
-          <MDTypography variant="h5">Material UI Configurator</MDTypography>
+          <MDTypography variant="h5">Settings</MDTypography>
           <MDTypography variant="body2" color="text">
-            See our dashboard options.
+            kachow.
           </MDTypography>
         </MDBox>
 

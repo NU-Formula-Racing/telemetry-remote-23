@@ -65,6 +65,9 @@ function reducer(state, action) {
     case "ALL_DATA_RECEIVED": {
       return { ...state, dataReceived: !state.dataReceived };
     }
+    case "POLL_SERVER": {
+      return { ...state, serverOnline: action.value };
+    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -85,6 +88,7 @@ function MaterialUIControllerProvider({ children }) {
     darkMode: true,
     sensorData: {},
     dataReceived: false,
+    serverOnline: false,
   };
 
   const [controller, dispatch] = useReducer(reducer, initialState);
@@ -126,6 +130,7 @@ const setDarkMode = (dispatch, value) => dispatch({ type: "DARKMODE", value });
 const initSensorData = (dispatch, value) => dispatch({ type: "INIT_SENSOR_DATA", value });
 const appendSensorData = (dispatch, value) => dispatch({ type: "APPEND_SENSOR_DATA", value });
 const setDataReceived = (dispatch) => dispatch({ type: "ALL_DATA_RECEIVED" });
+const setServerOnline = (dispatch, value) => dispatch({ type: "POLL_SERVER", value });
 
 export {
   MaterialUIControllerProvider,
@@ -143,4 +148,5 @@ export {
   initSensorData,
   appendSensorData,
   setDataReceived,
+  setServerOnline,
 };

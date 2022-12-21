@@ -54,6 +54,65 @@ function configs(titles) {
         legend: {
           display: false,
         },
+        zoom: {
+          pan: {
+            enabled: true,
+            mode: "x",
+            scaleMode: "x",
+            onPanComplete: ({ chart }) => {
+              const { min, max } = chart.scales.x;
+              if (min >= max) {
+                console.log(`%cEP: ${chart.scales.x.min} ${chart.scales.x.max}`, "color: red;");
+              } else {
+                console.log(`PP: ${chart.scales.x.min} ${chart.scales.x.max}`);
+              }
+              // if (min >= max) {
+              //   chart.scales.x.min = chart.options.plugins.zoom.limits.x.min;
+              //   chart.scales.x.max = chart.options.plugins.zoom.limits.x.max;
+              //   chart.update();
+              // }
+              // for (let i = 0; i < chart.data.datasets.length; i += 1) {
+              //   chart.data.datasets[i].data = [50, ...chart.data.datasets[i].data];
+              //   if (chart.data.labels.length < chart.data.datasets[i].data.length) {
+              //     const firstTime = chart.data.labels[0];
+              //     chart.data.labels.push(firstTime - 0.1);
+              //     chart.scales.x.min -= 1;
+              //   }
+              // }
+            },
+          },
+          limits: {
+            x: {
+              min: "original",
+              max: "original",
+              minRange: 20,
+            },
+          },
+          zoom: {
+            wheel: {
+              enabled: true,
+              mode: "x",
+              speed: 0.1,
+            },
+            mode: "x",
+            speed: 0.1,
+            onZoomComplete: ({ chart }) => {
+              // chart.update();
+              const { min, max } = chart.scales.x;
+              if (min >= max) {
+                console.log(`%cEZ: ${chart.scales.x.min} ${chart.scales.x.max}`, "color: red;");
+              } else {
+                console.log(`ZZ: ${chart.scales.x.min} ${chart.scales.x.max}`);
+              }
+              if (min >= max) {
+                const copyMin = chart.options.plugins.zoom.limits.x.min;
+                const copyMax = chart.options.plugins.zoom.limits.x.max;
+                chart.scales.x.min = copyMin;
+                chart.scales.x.max = copyMax;
+              }
+            },
+          },
+        },
       },
       interaction: {
         intersect: false,
@@ -124,7 +183,7 @@ export default configs;
 *   scale bounds go crazy if pan too much to left side
 *   zoom keeps getting reset to max zoom if zoom out too much
 *   pan zoom misbehaves at around the same index
-*   hypothesis: graph on the left does not remain rendered even if data is present in array
+*   hypothesis: graph on left is rendered, bug with source code itself
 *   also possible to have something to do with useMemo. Not sure tho
 *   possible fix: use onPan/onZoom to update and redraw the chart
 *   current code: zoom and pan works on small scale movements:
@@ -177,5 +236,4 @@ export default configs;
             },
           },
         },
-      },
 */

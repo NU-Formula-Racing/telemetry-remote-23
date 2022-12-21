@@ -1,18 +1,3 @@
-/**
-=========================================================
-* Material Dashboard 2 React - v2.1.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/material-dashboard-react
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState, useEffect } from "react";
 
 // react-router components
@@ -29,7 +14,8 @@ import Icon from "@mui/material/Icon";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
-import MDInput from "components/MDInput";
+import MDTypography from "components/MDTypography";
+// import MDInput from "components/MDInput";
 
 // Material Dashboard 2 React example components
 import Breadcrumbs from "custom/Breadcrumbs";
@@ -43,7 +29,7 @@ import { useMaterialUIController, setTransparentNavbar, setOpenConfigurator } fr
 function NavBar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
-  const { transparentNavbar, fixedNavbar, openConfigurator, darkMode } = controller;
+  const { transparentNavbar, fixedNavbar, openConfigurator, darkMode, serverOnline } = controller;
   const route = useLocation().pathname.split("/").slice(1);
 
   useEffect(() => {
@@ -101,8 +87,11 @@ function NavBar({ absolute, light, isMini }) {
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
             <MDBox pr={1}>
-              <MDInput label="Search here" />
+              <MDTypography> {serverOnline ? "green" : "red"} </MDTypography>
             </MDBox>
+            {/* <MDBox pr={1}>
+              <MDInput label="Search here" />
+            </MDBox> */}
             <MDBox color={light ? "white" : "inherit"}>
               <IconButton
                 size="small"

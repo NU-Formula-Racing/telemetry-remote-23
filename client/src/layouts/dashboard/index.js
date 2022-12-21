@@ -20,7 +20,7 @@ function Dashboard() {
   const [controller] = useMaterialUIController();
   const { darkMode, sensorData } = controller;
   const sensorNames = Object.keys(sensorData);
-  const sensorGroup1 = [0, 1, 2, 3];
+  // const sensorGroup1 = [0, 1, 2, 3];
   const sensorGroup2 = [8, 9];
 
   const renderCharts = (sensorList) => {
@@ -38,6 +38,7 @@ function Dashboard() {
   };
 
   const renderCards = (i) => {
+    // check if data from sockets have arrived yet
     const valid = sensorNames.length > i;
     const cardProps = {
       color: "dark",
@@ -65,9 +66,9 @@ function Dashboard() {
       <MDBox>
         <MDBox>
           <Grid container spacing={0}>
-            <Grid item xs={12} md={12} lg={12}>
+            {/* <Grid item xs={12} md={12} lg={12}>
               <MDBox> {renderCharts(sensorGroup1)} </MDBox>
-            </Grid>
+            </Grid> */}
             <Grid item xs={12} md={12} lg={12}>
               <MDBox mb={3}>
                 <MDBox> {renderCharts(sensorGroup2)} </MDBox>
