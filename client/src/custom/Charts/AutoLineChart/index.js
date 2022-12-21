@@ -108,8 +108,14 @@ function AutoLineChart({ color, titles, scale }) {
     // currently zoom and pans all charts, need prop or context to differentiate
     // extract this into util file?
 
-    const setDataToRange = () => {
-      const { start, end } = range;
+    const setDataToRange = (reset = false) => {
+      let { start, end } = range;
+      if (reset) {
+        const lastIndex = sensorData[titles[0]][0].length;
+        start = lastIndex - scale;
+        end = lastIndex;
+        setRange({ start, end });
+      }
       const labels = sensorData[titles[0]][0].slice(start, end);
       const datasets = chart.data.datasets.map((dataset, index) => {
         const newData = sensorData[titles[index]][1].slice(start, end);
@@ -174,11 +180,7 @@ function AutoLineChart({ color, titles, scale }) {
         break;
       // reset zoom and pan
       case "R":
-        const lastIndex = sensorData[titles[0]][0].length;
-        // console.log(`lastIndex: ${lastIndex}`);
-        setRange({ start: lastIndex - scale, end: lastIndex });
-        setDataToRange();
-        chart.update();
+        setDataToRange(true);
         setZoomPan(false);
         break;
       default:
