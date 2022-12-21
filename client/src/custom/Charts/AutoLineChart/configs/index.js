@@ -56,7 +56,7 @@ function configs(titles) {
         },
         zoom: {
           pan: {
-            enabled: true,
+            enabled: false,
             mode: "x",
             scaleMode: "x",
             onPanComplete: ({ chart }) => {
@@ -90,7 +90,7 @@ function configs(titles) {
           },
           zoom: {
             wheel: {
-              enabled: true,
+              enabled: false,
               mode: "x",
               speed: 0.1,
             },

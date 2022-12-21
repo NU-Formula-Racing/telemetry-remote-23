@@ -60,7 +60,7 @@ function AutoLineChart({ color, titles, scale }) {
   const renderWarningSB = (
     <MDSnackbar
       color="warning"
-      icon="star"
+      icon="warning"
       title={toastMsg.title}
       content={toastMsg.content}
       dateTime="now"
@@ -172,10 +172,13 @@ function AutoLineChart({ color, titles, scale }) {
       case "D":
         handleZoomPan(large, large);
         break;
+      // reset zoom and pan
       case "R":
         const lastIndex = sensorData[titles[0]][0].length;
+        // console.log(`lastIndex: ${lastIndex}`);
         setRange({ start: lastIndex - scale, end: lastIndex });
         setDataToRange();
+        chart.update();
         setZoomPan(false);
         break;
       default:
@@ -184,10 +187,10 @@ function AutoLineChart({ color, titles, scale }) {
   }
   useEventListener("keydown", handler);
 
-  useEffect(() => {
-    const { start, end } = range;
-    console.log(`range: ${start} - ${end}`);
-  }, [range]);
+  // useEffect(() => {
+  //   const { start, end } = range;
+  //   console.log(`range: ${start} - ${end}`);
+  // }, [range]);
 
   function onZoomPan({ chart }) {
     console.log(chart);
@@ -199,23 +202,23 @@ function AutoLineChart({ color, titles, scale }) {
     // check if sensor data has been initialized and loaded from ws
     if (!chartData) {
       console.log("chartData is undefined");
-      renderSB(`${chartName} error`, "chart data is undefined");
+      // renderSB(`"${chartName}" chart error`, "chart data is undefined");
       return;
     }
     if (sensorNames.length < 0) {
       console.log("websocket offline. no sensor detected");
-      renderSB(`${chartName} error`, "websocket offline. no sensor detected");
+      // renderSB(`"${chartName}" chart error`, "websocket offline. no sensor detected");
       return;
     }
     const { current: chart } = chartRef;
     if (!chart) {
       console.log(`chart is undefined for ${chartName}`);
-      renderSB(`${chartName} error`, `chart is undefined for ${chartName}`);
+      // renderSB(`"${chartName}" chart error`, `chart is undefined for ${chartName}`);
       return;
     }
 
     if (isZoomPan) {
-      console.log("zoom/pan is active. stop receiving data");
+      // console.log("zoom/pan is active. stop receiving data");
       return;
     }
 

@@ -32,7 +32,7 @@ import {
   initSensorData,
   appendSensorData,
   setDataReceived,
-  setServerOnline,
+  setConnected,
 } from "context";
 
 // Images
@@ -45,39 +45,40 @@ import { Manager } from "socket.io-client";
 // util for inspecting objects for debugging
 import util from "util";
 
-const manager = new Manager("http://localhost:3001", { autoConnect: true });
-const socket = manager.socket("/");
-
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
-  const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData } = controller;
+  const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData, connected } = controller;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);s
-  const [onInitialize, setOnInitialize] = useState(false);
+  const [socket, setSocket] = useState(null);
   const { pathname } = useLocation();
 
   // have state and display for if server is online
   // display on navbar. connecting to server. or have like connected
   // have like red and green indicator. get rid of toasts on app.
 
-  // catch connection errors, can be used to print toasts
-
-  manager.on("error", (e) => {
-    console.log(e);
-  });
-
   // handle socket responses
+  const handleSetConnected = (res) => setConnected(dispatch, res);
   const handleInitSensorData = (res) => initSensorData(dispatch, res);
   const handleAppendSensorData = (res) => appendSensorData(dispatch, res);
   const handleSetDataReceived = () => setDataReceived(dispatch);
+  // const handleSetServerOnline = (res) => setServerOnline(dispatch, res);
 
   // called right after the first render completes
   // fetch init sensor data from server
   useEffect(() => {
+    const newManager = new Manager("http://localhost:3001", { autoConnect: true });
+    const newSocket = newManager.socket("/");
     console.log("Component mounted. Fetching sensor data...");
-    socket.emit("getSensors", (res) => {
+    newSocket.emit("getSensors", (res) => {
       console.log("getSensors socket response: ", res);
       handleInitSensorData(res);
     });
+
+    newSocket.on("disconnect", () => {
+      console.log("Disconnected from server");
+      handleSetConnected(false);
+    });
+    setSocket(newSocket);
   }, []);
 
   const debug = false;
@@ -95,16 +96,18 @@ export default function App() {
       );
     }
     // if sensorData is not empty, then begin loading data into memory
-    if (Object.keys(sensorData).length > 0 && !onInitialize) {
-      setOnInitialize(true);
-      setServerOnline(dispatch, true);
+    if (Object.keys(sensorData).length > 0 && !connected) {
+      handleSetConnected(true);
     }
   }, [sensorData]);
 
   // begin receiving real time data once sensorData state initialized
   useEffect(() => {
+    if (!socket) {
+      return;
+    }
     socket.on("sendSensorData", (newSensorData) => {
-      if (onInitialize) {
+      if (connected) {
         Object.keys(newSensorData).forEach((sensorName) => {
           const dataObj = {
             name: sensorName,
@@ -117,7 +120,7 @@ export default function App() {
         handleSetDataReceived();
       }
     });
-  }, [onInitialize]);
+  }, [connected]);
 
   // Setting page scroll to 0 when changing the route
   useEffect(() => {

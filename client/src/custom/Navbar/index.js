@@ -29,7 +29,7 @@ import { useMaterialUIController, setTransparentNavbar, setOpenConfigurator } fr
 function NavBar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useMaterialUIController();
-  const { transparentNavbar, fixedNavbar, openConfigurator, darkMode, serverOnline } = controller;
+  const { transparentNavbar, fixedNavbar, openConfigurator, darkMode, connected } = controller;
   const route = useLocation().pathname.split("/").slice(1);
 
   useEffect(() => {
@@ -86,8 +86,10 @@ function NavBar({ absolute, light, isMini }) {
         </MDBox>
         {isMini ? null : (
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
-            <MDBox pr={1}>
-              <MDTypography> {serverOnline ? "green" : "red"} </MDTypography>
+            <MDBox pr={1} color={light ? "white" : "inherit"}>
+              <MDTypography variant="button" fontWeight="light" color="text">
+                {connected ? "status: connected" : "status: disconnected"}
+              </MDTypography>
             </MDBox>
             {/* <MDBox pr={1}>
               <MDInput label="Search here" />

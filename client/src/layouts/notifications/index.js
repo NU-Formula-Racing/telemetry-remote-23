@@ -100,7 +100,7 @@ function Notifications() {
       color="error"
       icon="warning"
       title="Material Dashboard"
-      content="Hello, world! This is an error notification message"
+      content="Hello, world! This is a notification message"
       dateTime="11 mins ago"
       open={errorSB}
       onClose={closeErrorSB}

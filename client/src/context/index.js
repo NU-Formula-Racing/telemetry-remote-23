@@ -42,6 +42,10 @@ function reducer(state, action) {
     case "DARKMODE": {
       return { ...state, darkMode: action.value };
     }
+    // tracks connection to node js server
+    case "CONNECTED": {
+      return { ...state, connected: action.value };
+    }
     case "INIT_SENSOR_DATA": {
       // should populate as a dict mapping from names to lists of data
       // console.log("SENSOR_DATA", action.value);
@@ -65,9 +69,6 @@ function reducer(state, action) {
     case "ALL_DATA_RECEIVED": {
       return { ...state, dataReceived: !state.dataReceived };
     }
-    case "POLL_SERVER": {
-      return { ...state, serverOnline: action.value };
-    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -88,7 +89,7 @@ function MaterialUIControllerProvider({ children }) {
     darkMode: true,
     sensorData: {},
     dataReceived: false,
-    serverOnline: false,
+    connected: false,
   };
 
   const [controller, dispatch] = useReducer(reducer, initialState);
@@ -127,10 +128,10 @@ const setOpenConfigurator = (dispatch, value) => dispatch({ type: "OPEN_CONFIGUR
 const setDirection = (dispatch, value) => dispatch({ type: "DIRECTION", value });
 const setLayout = (dispatch, value) => dispatch({ type: "LAYOUT", value });
 const setDarkMode = (dispatch, value) => dispatch({ type: "DARKMODE", value });
+const setConnected = (dispatch, value) => dispatch({ type: "CONNECTED", value });
 const initSensorData = (dispatch, value) => dispatch({ type: "INIT_SENSOR_DATA", value });
 const appendSensorData = (dispatch, value) => dispatch({ type: "APPEND_SENSOR_DATA", value });
 const setDataReceived = (dispatch) => dispatch({ type: "ALL_DATA_RECEIVED" });
-const setServerOnline = (dispatch, value) => dispatch({ type: "POLL_SERVER", value });
 
 export {
   MaterialUIControllerProvider,
@@ -145,8 +146,8 @@ export {
   setDirection,
   setLayout,
   setDarkMode,
+  setConnected,
   initSensorData,
   appendSensorData,
   setDataReceived,
-  setServerOnline,
 };
