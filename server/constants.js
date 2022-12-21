@@ -1,8 +1,8 @@
 //****************************** CONFIG ***************************************
 
-const DB_PATH = './server/db/database.sqlite3'
+const DB_PATH = './db/database.sqlite3'
 const IS_TESTING = true;
-const DATA_PERIOD = 1; // seconds
+const DATA_PERIOD = 0.2; // seconds
 
 
 //****************************** SENSORS ***************************************

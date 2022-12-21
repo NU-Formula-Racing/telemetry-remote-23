@@ -1,14 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from "react";
+import ReactDOM from "react-dom";
+import { BrowserRouter } from "react-router-dom";
+import App from "App";
 
-import App from './App';
-import { ContextProvider } from './components/shared/Context';
+// Material Dashboard 2 React Context Provider
+import { MaterialUIControllerProvider } from "context";
 
 ReactDOM.render(
-  <React.StrictMode>
-    <ContextProvider>
+  <BrowserRouter>
+    <MaterialUIControllerProvider>
       <App />
-    </ContextProvider>
-  </React.StrictMode>,
-  document.getElementById('root')
+    </MaterialUIControllerProvider>
+  </BrowserRouter>,
+  document.getElementById("root")
 );

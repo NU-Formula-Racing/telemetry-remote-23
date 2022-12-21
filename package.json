@@ -13,6 +13,7 @@
     "@aws-sdk/client-dynamodb": "^3.204.0",
     "aws-sdk": "^2.1254.0",
     "bluebird": "^3.7.2",
+    "chartjs-plugin-zoom": "^2.0.0",
     "cors": "^2.8.5",
     "express": "^4.18.1",
     "serialport": "^10.4.0",
