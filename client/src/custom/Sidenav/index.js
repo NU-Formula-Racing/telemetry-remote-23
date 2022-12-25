@@ -29,6 +29,7 @@ import Icon from "@mui/material/Icon";
 
 // Material Dashboard 2 React components
 import MDBox from "components/MDBox";
+import MDButton from "components/MDButton";
 import MDTypography from "components/MDTypography";
 
 // Material Dashboard 2 React example components
@@ -46,9 +47,9 @@ import {
   setWhiteSidenav,
 } from "context";
 
-function Sidenav({ color, brand, brandName, routes, ...rest }) {
+function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
   const [controller, dispatch] = useMaterialUIController();
-  const { miniSidenav, transparentSidenav, whiteSidenav, darkMode } = controller;
+  const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, connected } = controller;
   const location = useLocation();
   const collapseName = location.pathname.replace("/", "");
 
@@ -61,6 +62,17 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   }
 
   const closeSidenav = () => setMiniSidenav(dispatch, true);
+
+  // FIX THIS
+  const handleConnectToServer = () => {
+    if (connected) {
+      console.log("disconnecting from server");
+      socket.disconnect();
+    } else {
+      console.log("connecting to server");
+      socket.connect();
+    }
+  };
 
   useEffect(() => {
     // A function that sets the mini state of the sidenav.
@@ -178,6 +190,21 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
         }
       />
       <List>{renderRoutes}</List>
+      <MDBox mt="auto" p={2}>
+        {socket ? (
+          <MDButton
+            color={connected ? "error" : "success"}
+            onClick={handleConnectToServer}
+            fullwidth="true"
+          >
+            {connected ? "disconnect from server" : "connect to server"}
+          </MDButton>
+        ) : (
+          <MDButton color="dark" fullwidth="true">
+            server not found
+          </MDButton>
+        )}
+      </MDBox>
     </SidenavRoot>
   );
 }
@@ -186,6 +213,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
 Sidenav.defaultProps = {
   color: "info",
   brand: "",
+  socket: null,
 };
 
 // Typechecking props for the Sidenav
@@ -194,6 +222,7 @@ Sidenav.propTypes = {
   brand: PropTypes.string,
   brandName: PropTypes.string.isRequired,
   routes: PropTypes.arrayOf(PropTypes.object).isRequired,
+  socket: PropTypes.object, // should be socket.io socket
 };
 
 export default Sidenav;

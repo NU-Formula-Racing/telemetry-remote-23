@@ -36,9 +36,9 @@ const { SerialPort } = require("serialport");
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 const dynamoDBHelper = require('./dynamodb.js');
 // imports for SQLite
-const DAO = require('../db/DAO.js')
-const DataRepository = require('../db/DataRepository.js')
-const SessionRepository = require('../db/SessionRepository.js')
+const DAO = require('./db/DAO.js')
+const DataRepository = require('./db/DataRepository.js')
+const SessionRepository = require('./db/SessionRepository.js')
 // imports for custom modules
 const C = require('./constants.js');
 const testing = require('./testing.js');
@@ -89,17 +89,22 @@ sessionRepo.createTable()
   .then(() => {
     io.on('connection', (socket) => {
       console.log(`${socket.id} client connected!`);
-    
+
+      socket.on('initializeSession', (session_id, callback) => {
+        console.log("session_id: ", session_id);
+        callback("session initialized");
+      });
+
       // send list of sensor names and initial values to client
       socket.on('getSensors', (callback) => {
         initValues = {}
-        for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
+        for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
           // charts need 1 array per axis on graph
           initValues[C.SENSORS[i].name] = [[0.01], [0.01]];
         }
         callback(initValues);
       });
-    
+
       // send sensor data to client
       if (C.IS_TESTING){
         // send generated data to client on 1s interval

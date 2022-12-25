@@ -27,7 +27,7 @@ function sendFakeData(socket, dataRepo, origin, sessionID=0) {
   }
   // send data to client
   console.log("DataObj sending to client @ t=", curTime);
-  console.log(`\t${C.SENSOR_NAMES[0]}: ${dataObj[C.SENSOR_NAMES[0]].val}`)
+  // console.log(`\t${C.SENSOR_NAMES[0]}: ${dataObj[C.SENSOR_NAMES[0]].val}`)
   socket.emit('sendSensorData',  dataObj);
 }
 

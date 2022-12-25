@@ -1,8 +1,6 @@
 // TODO:
-// 1. scroll box + pan? + extract to helper root?
-// 4. adjust style (thinner graphs, display axis on last?)
-// 4. make multiple dashboards
-// 5. focus on funtionality, then style
+// 1. connect with session
+// 2. package as electron app
 
 import { useEffect, useState } from "react";
 
@@ -48,8 +46,9 @@ import util from "util";
 export default function App() {
   const [controller, dispatch] = useMaterialUIController();
   const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData, connected } = controller;
-  // const [onMouseEnter, setOnMouseEnter] = useState(false);s
+  // const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [socket, setSocket] = useState(null);
+  // const [manager, setManager] = useState(null);
   const { pathname } = useLocation();
 
   // have state and display for if server is online
@@ -63,24 +62,30 @@ export default function App() {
   const handleSetDataReceived = () => setDataReceived(dispatch);
   // const handleSetServerOnline = (res) => setServerOnline(dispatch, res);
 
-  // called right after the first render completes
-  // fetch init sensor data from server
+  /*
+   * initialize socket connection
+   * fetch initial sensor data or session data
+   */
   useEffect(() => {
-    const newManager = new Manager("http://localhost:3001", { autoConnect: true });
+    const newManager = new Manager("http://localhost:3001", { autoConnect: false });
     const newSocket = newManager.socket("/");
     console.log("Component mounted. Fetching sensor data...");
+
+    newSocket.emit("initializeSession", "session_id", (res) => {
+      console.log("initializeSession response: ", res);
+    });
+
     newSocket.emit("getSensors", (res) => {
       console.log("getSensors socket response: ", res);
       handleInitSensorData(res);
     });
-
-    newSocket.on("disconnect", () => {
-      console.log("Disconnected from server");
-      handleSetConnected(false);
-    });
     setSocket(newSocket);
+    // setManager(newManager);
   }, []);
 
+  /*
+   * set connected state to true when sensorData is not empty
+   */
   const debug = false;
   // called when sensorData state changes
   useEffect(() => {
@@ -101,11 +106,18 @@ export default function App() {
     }
   }, [sensorData]);
 
-  // begin receiving real time data once sensorData state initialized
+  /*
+   * set up socket listeners
+   */
   useEffect(() => {
     if (!socket) {
       return;
     }
+    // tracks connection status
+    socket.on("disconnect", () => {
+      console.log("Disconnected from server");
+      handleSetConnected(false);
+    });
     socket.on("sendSensorData", (newSensorData) => {
       if (connected) {
         Object.keys(newSensorData).forEach((sensorName) => {
@@ -148,6 +160,7 @@ export default function App() {
             color={darkMode ? "dark" : "info"}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandWhite : brandWhite}
             brandName="NUFSAE Telemetry"
+            socket={socket}
             routes={routes}
           />
           <Configurator />
