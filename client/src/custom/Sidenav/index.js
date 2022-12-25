@@ -45,11 +45,15 @@ import {
   setMiniSidenav,
   setTransparentSidenav,
   setWhiteSidenav,
-} from "context";
+} from "context/MaterialUIProvider";
+
+import { useSensorController } from "context/SensorProvider";
 
 function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
-  const [controller, dispatch] = useMaterialUIController();
-  const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, connected } = controller;
+  const [muiController, muiDispatch] = useMaterialUIController();
+  const [sensorController] = useSensorController();
+  const { miniSidenav, transparentSidenav, whiteSidenav, darkMode } = muiController;
+  const { connected } = sensorController;
   const location = useLocation();
   const collapseName = location.pathname.replace("/", "");
 
@@ -61,7 +65,7 @@ function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
     textColor = "inherit";
   }
 
-  const closeSidenav = () => setMiniSidenav(dispatch, true);
+  const closeSidenav = () => setMiniSidenav(muiDispatch, true);
 
   // FIX THIS
   const handleConnectToServer = () => {
@@ -77,9 +81,9 @@ function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
   useEffect(() => {
     // A function that sets the mini state of the sidenav.
     function handleMiniSidenav() {
-      setMiniSidenav(dispatch, window.innerWidth < 1200);
-      setTransparentSidenav(dispatch, window.innerWidth < 1200 ? false : transparentSidenav);
-      setWhiteSidenav(dispatch, window.innerWidth < 1200 ? false : whiteSidenav);
+      setMiniSidenav(muiDispatch, window.innerWidth < 1200);
+      setTransparentSidenav(muiDispatch, window.innerWidth < 1200 ? false : transparentSidenav);
+      setWhiteSidenav(muiDispatch, window.innerWidth < 1200 ? false : whiteSidenav);
     }
 
     /** 
@@ -92,7 +96,7 @@ function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
 
     // Remove event listener on cleanup
     return () => window.removeEventListener("resize", handleMiniSidenav);
-  }, [dispatch, location]);
+  }, [muiDispatch, location]);
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
   const renderRoutes = routes.map(({ type, name, icon, title, noCollapse, key, href, route }) => {

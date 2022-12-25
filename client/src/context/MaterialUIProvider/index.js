@@ -92,9 +92,9 @@ function MaterialUIControllerProvider({ children }) {
     connected: false,
   };
 
-  const [controller, dispatch] = useReducer(reducer, initialState);
+  const [muiController, muiDispatch] = useReducer(reducer, initialState);
 
-  const value = useMemo(() => [controller, dispatch], [controller, dispatch]);
+  const value = useMemo(() => [muiController, muiDispatch], [muiController, muiDispatch]);
 
   return <MaterialUI.Provider value={value}>{children}</MaterialUI.Provider>;
 }

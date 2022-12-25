@@ -34,11 +34,11 @@ import {
 } from "custom/Sidenav/styles/sidenavCollapse";
 
 // Material Dashboard 2 React context
-import { useMaterialUIController } from "context";
+import { useMaterialUIController } from "context/MaterialUIProvider";
 
 function SidenavCollapse({ icon, name, active, ...rest }) {
-  const [controller] = useMaterialUIController();
-  const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = controller;
+  const [muiController] = useMaterialUIController();
+  const { miniSidenav, transparentSidenav, whiteSidenav, darkMode, sidenavColor } = muiController;
 
   return (
     <ListItem component="li">

@@ -1,9 +1,9 @@
 // Material Dashboard 2 React contexts
-import { useMaterialUIController } from "context";
+import { useMaterialUIController } from "context/MaterialUIProvider";
 
 function configs(labels, datasets) {
-  const [controller] = useMaterialUIController();
-  const { darkMode } = controller;
+  const [muiController] = useMaterialUIController();
+  const { darkMode } = muiController;
 
   return {
     data: {

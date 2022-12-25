@@ -22,11 +22,12 @@ import {
   setFixedNavbar,
   setDarkMode,
   setSidenavColor,
-} from "context";
+} from "context/MaterialUIProvider";
 
 function Configurator() {
-  const [controller, dispatch] = useMaterialUIController();
-  const { openConfigurator, fixedNavbar, transparentSidenav, whiteSidenav, darkMode } = controller;
+  const [muiController, muiDispatch] = useMaterialUIController();
+  const { openConfigurator, fixedNavbar, transparentSidenav, whiteSidenav, darkMode } =
+    muiController;
   const [disabled, setDisabled] = useState(false);
 
   // Use the useEffect hook to change the button state for the sidenav type based on window size.
@@ -46,23 +47,23 @@ function Configurator() {
     return () => window.removeEventListener("resize", handleDisabled);
   }, []);
 
-  const handleCloseConfigurator = () => setOpenConfigurator(dispatch, false);
+  const handleCloseConfigurator = () => setOpenConfigurator(muiDispatch, false);
   const handleTransparentSidenav = () => {
-    setTransparentSidenav(dispatch, true);
-    setWhiteSidenav(dispatch, false);
+    setTransparentSidenav(muiDispatch, true);
+    setWhiteSidenav(muiDispatch, false);
   };
   const handleWhiteSidenav = () => {
-    setWhiteSidenav(dispatch, true);
-    setTransparentSidenav(dispatch, false);
+    setWhiteSidenav(muiDispatch, true);
+    setTransparentSidenav(muiDispatch, false);
   };
   const handleDarkSidenav = () => {
-    setWhiteSidenav(dispatch, false);
-    setTransparentSidenav(dispatch, false);
+    setWhiteSidenav(muiDispatch, false);
+    setTransparentSidenav(muiDispatch, false);
   };
-  const handleFixedNavbar = () => setFixedNavbar(dispatch, !fixedNavbar);
+  const handleFixedNavbar = () => setFixedNavbar(muiDispatch, !fixedNavbar);
   const handleDarkMode = () => {
-    setDarkMode(dispatch, !darkMode);
-    setSidenavColor(dispatch, darkMode ? "secondary" : "dark");
+    setDarkMode(muiDispatch, !darkMode);
+    setSidenavColor(muiDispatch, darkMode ? "secondary" : "dark");
   };
 
   // sidenav type buttons styles

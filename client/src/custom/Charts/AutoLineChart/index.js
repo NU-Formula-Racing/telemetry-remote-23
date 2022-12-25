@@ -9,7 +9,7 @@ import { Chart as ChartJS } from "chart.js";
 import zoomPlugin from "chartjs-plugin-zoom";
 
 // Material Dashboard 2 React contexts
-import { useMaterialUIController } from "context";
+import { useSensorController } from "context/SensorProvider";
 
 // @mui material components
 import Card from "@mui/material/Card";
@@ -39,8 +39,8 @@ const parseName = (str) => {
 };
 
 function AutoLineChart({ color, titles, scale }) {
-  const [controller] = useMaterialUIController();
-  const { sensorData, dataReceived } = controller;
+  const [sensorController] = useSensorController();
+  const { sensorData, dataReceived } = sensorController;
   const sensorNames = Object.keys(sensorData);
   const [description, setDescription] = useState("undefined");
   // titles guaranteed to be non-empty

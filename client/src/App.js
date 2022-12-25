@@ -25,13 +25,15 @@ import themeDark from "assets/theme-dark";
 import routes from "routes";
 
 // Material Dashboard 2 React contexts
+import { useMaterialUIController } from "context/MaterialUIProvider";
+
 import {
-  useMaterialUIController,
+  useSensorController,
   initSensorData,
   appendSensorData,
   setDataReceived,
   setConnected,
-} from "context";
+} from "context/SensorProvider";
 
 // Images
 import brandWhite from "assets/images/F1-logo.png";
@@ -44,8 +46,10 @@ import { Manager } from "socket.io-client";
 import util from "util";
 
 export default function App() {
-  const [controller, dispatch] = useMaterialUIController();
-  const { layout, transparentSidenav, whiteSidenav, darkMode, sensorData, connected } = controller;
+  const [muiController] = useMaterialUIController();
+  const { layout, transparentSidenav, whiteSidenav, darkMode } = muiController;
+  const [sensorController, sensorDispatch] = useSensorController();
+  const { sensorData, connected } = sensorController;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);
   const [socket, setSocket] = useState(null);
   // const [manager, setManager] = useState(null);
@@ -56,11 +60,10 @@ export default function App() {
   // have like red and green indicator. get rid of toasts on app.
 
   // handle socket responses
-  const handleSetConnected = (res) => setConnected(dispatch, res);
-  const handleInitSensorData = (res) => initSensorData(dispatch, res);
-  const handleAppendSensorData = (res) => appendSensorData(dispatch, res);
-  const handleSetDataReceived = () => setDataReceived(dispatch);
-  // const handleSetServerOnline = (res) => setServerOnline(dispatch, res);
+  const handleSetConnected = (res) => setConnected(sensorDispatch, res);
+  const handleInitSensorData = (res) => initSensorData(sensorDispatch, res);
+  const handleAppendSensorData = (res) => appendSensorData(sensorDispatch, res);
+  const handleSetDataReceived = () => setDataReceived(sensorDispatch);
 
   /*
    * initialize socket connection

@@ -24,12 +24,20 @@ import Breadcrumbs from "custom/Breadcrumbs";
 import { navbar, navbarContainer, navbarRow, navbarIconButton } from "custom/Navbar/styles";
 
 // Material Dashboard 2 React context
-import { useMaterialUIController, setTransparentNavbar, setOpenConfigurator } from "context";
+import {
+  useMaterialUIController,
+  setTransparentNavbar,
+  setOpenConfigurator,
+} from "context/MaterialUIProvider";
+
+import { useSensorController } from "context/SensorProvider";
 
 function NavBar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
-  const [controller, dispatch] = useMaterialUIController();
-  const { transparentNavbar, fixedNavbar, openConfigurator, darkMode, connected } = controller;
+  const [muiController, muiDispatch] = useMaterialUIController();
+  const [sensorController] = useSensorController();
+  const { transparentNavbar, fixedNavbar, openConfigurator, darkMode } = muiController;
+  const { connected } = sensorController;
   const route = useLocation().pathname.split("/").slice(1);
 
   useEffect(() => {
@@ -42,7 +50,7 @@ function NavBar({ absolute, light, isMini }) {
 
     // A function that sets the transparent state of the navbar.
     function handleTransparentNavbar() {
-      setTransparentNavbar(dispatch, (fixedNavbar && window.scrollY === 0) || !fixedNavbar);
+      setTransparentNavbar(muiDispatch, (fixedNavbar && window.scrollY === 0) || !fixedNavbar);
     }
 
     /** 
@@ -56,10 +64,10 @@ function NavBar({ absolute, light, isMini }) {
 
     // Remove event listener on cleanup
     return () => window.removeEventListener("scroll", handleTransparentNavbar);
-  }, [dispatch, fixedNavbar]);
+  }, [muiDispatch, fixedNavbar]);
 
   // const handleMiniSidenav = () => setMiniSidenav(dispatch, !miniSidenav);
-  const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
+  const handleConfiguratorOpen = () => setOpenConfigurator(muiDispatch, !openConfigurator);
 
   // Styles for the navbar icons
   const iconsStyle = ({ palette: { dark, white, text }, functions: { rgba } }) => ({

@@ -1,10 +1,10 @@
 // Material Dashboard 2 React contexts
-import { useMaterialUIController } from "context";
+import { useMaterialUIController } from "context/MaterialUIProvider";
 // import "chartjs-plugin-zoom";
 
 function configs(titles) {
-  const [controller] = useMaterialUIController();
-  const { darkMode } = controller;
+  const [muiController] = useMaterialUIController();
+  const { darkMode } = muiController;
   // FIXME: figure how to change data colors based on dataset
 
   const darkModeColors = [

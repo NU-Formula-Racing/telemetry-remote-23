@@ -5,7 +5,8 @@ import Grid from "@mui/material/Grid";
 import MDBox from "components/MDBox";
 
 // Material Dashboard 2 React contexts
-import { useMaterialUIController } from "context";
+import { useMaterialUIController } from "context/MaterialUIProvider";
+import { useSensorController } from "context/SensorProvider";
 
 // Material Dashboard 2 React example components
 import DashboardLayout from "custom/LayoutContainers/DashboardLayout";
@@ -17,8 +18,10 @@ import StatisticsCard from "custom/Cards/StatisticsCard";
 // Dashboard components
 function Dashboard() {
   // const { tasks } = reportsLineChartData;
-  const [controller] = useMaterialUIController();
-  const { darkMode, sensorData } = controller;
+  const [muiController] = useMaterialUIController();
+  const { darkMode } = muiController;
+  const [sensorController] = useSensorController();
+  const { sensorData } = sensorController;
   const sensorNames = Object.keys(sensorData);
   const sensorGroup1 = [0, 1, 2, 3];
   const sensorGroup2 = [8, 9];
