@@ -49,11 +49,11 @@ import {
 
 import { useSensorController } from "context/SensorProvider";
 
-function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
+function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const [muiController, muiDispatch] = useMaterialUIController();
   const [sensorController] = useSensorController();
   const { miniSidenav, transparentSidenav, whiteSidenav, darkMode } = muiController;
-  const { connected } = sensorController;
+  const { socket } = sensorController;
   const location = useLocation();
   const collapseName = location.pathname.replace("/", "");
 
@@ -67,13 +67,12 @@ function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
 
   const closeSidenav = () => setMiniSidenav(muiDispatch, true);
 
-  // FIX THIS
   const handleConnectToServer = () => {
-    if (connected) {
-      console.log("disconnecting from server");
+    if (socket && socket.connected) {
+      console.log("Sidenav: disconnecting from server");
       socket.disconnect();
     } else {
-      console.log("connecting to server");
+      console.log("Sidenav: connecting to server");
       socket.connect();
     }
   };
@@ -197,11 +196,11 @@ function Sidenav({ color, brand, brandName, routes, socket, ...rest }) {
       <MDBox mt="auto" p={2}>
         {socket ? (
           <MDButton
-            color={connected ? "error" : "success"}
+            color={socket && socket.connected ? "error" : "success"}
             onClick={handleConnectToServer}
             fullwidth="true"
           >
-            {connected ? "disconnect from server" : "connect to server"}
+            {socket && socket.connected ? "disconnect from server" : "connect to server"}
           </MDButton>
         ) : (
           <MDButton color="dark" fullwidth="true">

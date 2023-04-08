@@ -23,8 +23,9 @@ function Dashboard() {
   const [sensorController] = useSensorController();
   const { sensorData } = sensorController;
   const sensorNames = Object.keys(sensorData);
-  const sensorGroup1 = [0, 1, 2, 3];
-  const sensorGroup2 = [8, 9];
+  const sensorGroup1 = [0, 1, 2, 3]; // Wheel Speed
+  const sensorGroup2 = [4, 5, 6, 7]; // Wheel Temp
+  const sensorGroup3 = [8, 9]; // brake pressure
 
   const renderCharts = (sensorList) => {
     const sensorGroupTitles = sensorList.map((i) =>
@@ -69,13 +70,23 @@ function Dashboard() {
       <MDBox>
         <MDBox>
           <Grid container spacing={0}>
-            <Grid item xs={12} md={12} lg={12}>
+            <Grid item xs={12} md={9} lg={9}>
               <MDBox> {renderCharts(sensorGroup1)} </MDBox>
             </Grid>
-            <Grid item xs={12} md={12} lg={12}>
-              <MDBox mb={3}>
-                <MDBox> {renderCharts(sensorGroup2)} </MDBox>
-              </MDBox>
+            <Grid item xs={12} md={3} lg={3}>
+              <MDBox> {renderCards(4)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={9} lg={9}>
+              <MDBox> {renderCharts(sensorGroup2)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={3} lg={3}>
+              <MDBox> {renderCards(4)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={9} lg={9}>
+              <MDBox> {renderCharts(sensorGroup3)} </MDBox>
+            </Grid>
+            <Grid item xs={12} md={3} lg={3}>
+              <MDBox> {renderCards(4)} </MDBox>
             </Grid>
           </Grid>
         </MDBox>

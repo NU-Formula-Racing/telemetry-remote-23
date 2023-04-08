@@ -37,7 +37,7 @@ function NavBar({ absolute, light, isMini }) {
   const [muiController, muiDispatch] = useMaterialUIController();
   const [sensorController] = useSensorController();
   const { transparentNavbar, fixedNavbar, openConfigurator, darkMode } = muiController;
-  const { connected } = sensorController;
+  const { status } = sensorController;
   const route = useLocation().pathname.split("/").slice(1);
 
   useEffect(() => {
@@ -96,7 +96,7 @@ function NavBar({ absolute, light, isMini }) {
           <MDBox sx={(theme) => navbarRow(theme, { isMini })}>
             <MDBox pr={1} color={light ? "white" : "inherit"}>
               <MDTypography variant="button" fontWeight="light" color="text">
-                {connected ? "status: connected" : "status: disconnected"}
+                {`status: ${status}`}
               </MDTypography>
             </MDBox>
             {/* <MDBox pr={1}>

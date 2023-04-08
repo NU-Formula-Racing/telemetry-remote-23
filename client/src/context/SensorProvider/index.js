@@ -5,6 +5,14 @@ import PropTypes from "prop-types";
 
 const Sensor = createContext();
 
+// enum alternative for connection status
+const Status = Object.freeze({
+  CONNECTED: "connected", // socket detected but no live data
+  DISCONNECTED: "disconnected", // socket not detected
+  LIVE: "live", // receiving live data
+  FETCHING: "fetching", // fetching startup data
+});
+
 // Setting custom name for the context which is visible on react dev tools
 Sensor.displayName = "SensorContext";
 
@@ -12,8 +20,14 @@ Sensor.displayName = "SensorContext";
 function reducer(state, action) {
   switch (action.type) {
     // tracks connection to node js server
-    case "CONNECTED": {
-      return { ...state, connected: action.value };
+    case "STATUS": {
+      return { ...state, status: action.value };
+    }
+    case "SOCKET": {
+      return { ...state, socket: action.value };
+    }
+    case "SESSION_DATA": {
+      return { ...state, sessionData: action.value };
     }
     case "INIT_SENSOR_DATA": {
       // should populate as a dict mapping from names to lists of data
@@ -47,9 +61,11 @@ function reducer(state, action) {
 // Material Dashboard 2 React context provider
 function SensorProvider({ children }) {
   const initialState = {
+    socket: null,
+    sessionData: [],
     sensorData: {},
     dataReceived: false,
-    connected: false,
+    status: Status.DISCONNECTED,
   };
 
   const [sensorController, sensordispatch] = useReducer(reducer, initialState);
@@ -79,15 +95,20 @@ SensorProvider.propTypes = {
 };
 
 // Context module functions
-const setConnected = (dispatch, value) => dispatch({ type: "CONNECTED", value });
+const setSocket = (dispatch, value) => dispatch({ type: "SOCKET", value });
+const setStatus = (dispatch, value) => dispatch({ type: "STATUS", value });
+const setSessionData = (dispatch, value) => dispatch({ type: "SESSION_DATA", value });
 const initSensorData = (dispatch, value) => dispatch({ type: "INIT_SENSOR_DATA", value });
 const appendSensorData = (dispatch, value) => dispatch({ type: "APPEND_SENSOR_DATA", value });
 const setDataReceived = (dispatch) => dispatch({ type: "ALL_DATA_RECEIVED" });
 
 export {
+  Status,
   SensorProvider,
   useSensorController,
-  setConnected,
+  setSocket,
+  setStatus,
+  setSessionData,
   initSensorData,
   appendSensorData,
   setDataReceived,

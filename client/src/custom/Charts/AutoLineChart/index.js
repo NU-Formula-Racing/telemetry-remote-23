@@ -79,25 +79,25 @@ function AutoLineChart({ color, titles, scale }) {
   // listen to key presses (auto mount/unmount)
   function handler({ key }) {
     if (!chartData) {
-      console.log("chartData is undefined");
+      console.log("Chart: chartData is undefined");
       renderSB("cannot zoom/pan", "chart data is undefined");
       return;
     }
     if (sensorNames.length <= 0) {
-      console.log("websocket offline. no sensor detected");
+      console.log("Chart: websocket offline. no sensor detected");
       renderSB("cannot zoom/pan", "websocket offline. no sensor detected");
       return;
     }
     const { current: chart } = chartRef;
     if (!chart) {
-      console.log(`chart is undefined for ${chartName}`);
+      console.log(`Chart: chart is undefined for ${chartName}`);
       renderSB("cannot zoom/pan", `chart is undefined for ${chartName}`);
       return;
     }
     // don't allow pan/zoom if has less data than minrange
     const MIN_RANGE = 10;
     if (sensorData[titles[0]][0].length < MIN_RANGE) {
-      console.log("not enough data to pan/zoom");
+      console.log("Chart: not enough data to pan/zoom");
       renderSB("cannot zoom/pan", "not enough data to pan/zoom");
       return;
     }
@@ -198,23 +198,26 @@ function AutoLineChart({ color, titles, scale }) {
     console.log(chart);
     setZoomPan(true);
   }
+  // TODO: need to add adjust range dynamically on startup
+  // i.e. when changing tabs, range need to update on startup
+  // to match existing data
 
   // runs everytime websocket event is received
   useEffect(() => {
     // check if sensor data has been initialized and loaded from ws
     if (!chartData) {
-      console.log("chartData is undefined");
+      console.log("Chart: chartData is undefined");
       // renderSB(`"${chartName}" chart error`, "chart data is undefined");
       return;
     }
     if (sensorNames.length < 0) {
-      console.log("websocket offline. no sensor detected");
+      console.log("Chart: websocket offline. no sensor detected");
       // renderSB(`"${chartName}" chart error`, "websocket offline. no sensor detected");
       return;
     }
     const { current: chart } = chartRef;
     if (!chart) {
-      console.log(`chart is undefined for ${chartName}`);
+      console.log(`Chart: chart is undefined for ${chartName}`);
       // renderSB(`"${chartName}" chart error`, `chart is undefined for ${chartName}`);
       return;
     }
@@ -285,7 +288,7 @@ function AutoLineChart({ color, titles, scale }) {
       <MDBox>
         <MDBox pb={5} px={1} flex-direction="row-reverse">
           <MDTypography display="inline" variant="h6" textTransform="capitalize">
-            {chartName} :
+            {chartName} AVG:
           </MDTypography>
           <MDTypography
             pl={1}

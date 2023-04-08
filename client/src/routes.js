@@ -37,7 +37,7 @@ Coded by www.creative-tim.com
 
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
-// import Tables from "layouts/tables";
+import Tables from "layouts/tables";
 // import Notifications from "layouts/notifications";
 
 // @mui icons
@@ -46,27 +46,27 @@ import Icon from "@mui/material/Icon";
 const routes = [
   {
     type: "collapse",
-    name: "Suspension",
+    name: "Sessions",
+    key: "sessions",
+    icon: <Icon fontSize="small">table_view</Icon>,
+    route: "/sessions",
+    component: <Tables />,
+  },
+  {
+    type: "collapse",
+    name: "dashboard",
     key: "dashboard",
     icon: <Icon fontSize="small">dashboard</Icon>,
     route: "/dashboard",
     component: <Dashboard />,
   },
-  {
-    type: "collapse",
-    name: "Powertrain",
-    key: "tables",
-    icon: <Icon fontSize="small">table_view</Icon>,
-    route: "/tables",
-    component: <Dashboard />,
-  },
   // {
   //   type: "collapse",
-  //   name: "Tables",
-  //   key: "tables",
+  //   name: "Powertrain",
+  //   key: "powertrain",
   //   icon: <Icon fontSize="small">table_view</Icon>,
-  //   route: "/tables",
-  //   component: <Tables />,
+  //   route: "/powertrain",
+  //   component: <Dashboard />,
   // },
   // {
   //   type: "collapse",

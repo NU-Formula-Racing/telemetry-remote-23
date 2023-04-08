@@ -42,33 +42,6 @@ function reducer(state, action) {
     case "DARKMODE": {
       return { ...state, darkMode: action.value };
     }
-    // tracks connection to node js server
-    case "CONNECTED": {
-      return { ...state, connected: action.value };
-    }
-    case "INIT_SENSOR_DATA": {
-      // should populate as a dict mapping from names to lists of data
-      // console.log("SENSOR_DATA", action.value);
-      return { ...state, sensorData: action.value };
-    }
-    case "APPEND_SENSOR_DATA": {
-      // adds a single data point for a single sensor
-      const { name, data } = action.value;
-      return {
-        ...state,
-        sensorData: {
-          ...state.sensorData,
-          [name]: [
-            // FIXME: cant just floor everything here
-            [...state.sensorData[name][0], Math.floor(data.time * 10) / 10],
-            [...state.sensorData[name][1], data.val],
-          ],
-        },
-      };
-    }
-    case "ALL_DATA_RECEIVED": {
-      return { ...state, dataReceived: !state.dataReceived };
-    }
     default: {
       throw new Error(`Unhandled action type: ${action.type}`);
     }
@@ -87,9 +60,6 @@ function MaterialUIControllerProvider({ children }) {
     openConfigurator: false,
     layout: "dashboard",
     darkMode: true,
-    sensorData: {},
-    dataReceived: false,
-    connected: false,
   };
 
   const [muiController, muiDispatch] = useReducer(reducer, initialState);
@@ -128,10 +98,6 @@ const setOpenConfigurator = (dispatch, value) => dispatch({ type: "OPEN_CONFIGUR
 const setDirection = (dispatch, value) => dispatch({ type: "DIRECTION", value });
 const setLayout = (dispatch, value) => dispatch({ type: "LAYOUT", value });
 const setDarkMode = (dispatch, value) => dispatch({ type: "DARKMODE", value });
-const setConnected = (dispatch, value) => dispatch({ type: "CONNECTED", value });
-const initSensorData = (dispatch, value) => dispatch({ type: "INIT_SENSOR_DATA", value });
-const appendSensorData = (dispatch, value) => dispatch({ type: "APPEND_SENSOR_DATA", value });
-const setDataReceived = (dispatch) => dispatch({ type: "ALL_DATA_RECEIVED" });
 
 export {
   MaterialUIControllerProvider,
@@ -146,8 +112,4 @@ export {
   setDirection,
   setLayout,
   setDarkMode,
-  setConnected,
-  initSensorData,
-  appendSensorData,
-  setDataReceived,
 };

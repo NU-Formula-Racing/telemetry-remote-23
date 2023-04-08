@@ -1,8 +1,13 @@
 // TODO:
-// 1. connect with session
-// 2. package as electron app
+// 1. connect with sessions: update sessions on reconnect, or add button to refresh sessions
+// 2. fetch all sensors data and load into graphs, graphs do not back all the way back up
+// 3. x-axis should just be current time parsed and displayed
+// 4. make sure page refreshes and tab changes behave correctly
+// 5. change dashboard layout to display 5 numbers on the right side: 5 rows
+// 6. add snack bar support for errors, socket events, alerts for data
+// 7. write batch file to launch both
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 // react-router components
 import { Routes, Route, Navigate, useLocation } from "react-router-dom";
@@ -28,11 +33,14 @@ import routes from "routes";
 import { useMaterialUIController } from "context/MaterialUIProvider";
 
 import {
+  Status,
   useSensorController,
+  setSocket,
   initSensorData,
   appendSensorData,
   setDataReceived,
-  setConnected,
+  setStatus,
+  setSessionData,
 } from "context/SensorProvider";
 
 // Images
@@ -49,18 +57,14 @@ export default function App() {
   const [muiController] = useMaterialUIController();
   const { layout, transparentSidenav, whiteSidenav, darkMode } = muiController;
   const [sensorController, sensorDispatch] = useSensorController();
-  const { sensorData, connected } = sensorController;
+  const { socket, sensorData } = sensorController;
   // const [onMouseEnter, setOnMouseEnter] = useState(false);
-  const [socket, setSocket] = useState(null);
-  // const [manager, setManager] = useState(null);
   const { pathname } = useLocation();
 
-  // have state and display for if server is online
-  // display on navbar. connecting to server. or have like connected
-  // have like red and green indicator. get rid of toasts on app.
-
   // handle socket responses
-  const handleSetConnected = (res) => setConnected(sensorDispatch, res);
+  const handleSetSocket = (res) => setSocket(sensorDispatch, res);
+  const handleSetStatus = (res) => setStatus(sensorDispatch, res);
+  const handleSetSessionData = (res) => setSessionData(sensorDispatch, res);
   const handleInitSensorData = (res) => initSensorData(sensorDispatch, res);
   const handleAppendSensorData = (res) => appendSensorData(sensorDispatch, res);
   const handleSetDataReceived = () => setDataReceived(sensorDispatch);
@@ -72,22 +76,26 @@ export default function App() {
   useEffect(() => {
     const newManager = new Manager("http://localhost:3001", { autoConnect: false });
     const newSocket = newManager.socket("/");
-    console.log("Component mounted. Fetching sensor data...");
-
-    newSocket.emit("initializeSession", "session_id", (res) => {
-      console.log("initializeSession response: ", res);
+    console.log("App: Component mounted.");
+    // FIXME: only fetches data on startup, but not if tab is reloaded
+    // TODO: sessions need to be fetched on reconnect?
+    // or just dynamically updated
+    newSocket.emit("startup", (res) => {
+      console.log("App: startup response: ", res);
+      handleSetSessionData(res.sessionList);
+      handleInitSensorData(res.initValues);
+      handleSetStatus(Status.CONNECTED);
+    });
+    // prevents socket from long polling
+    newManager.on("error", () => {
+      newSocket.disconnect();
     });
 
-    newSocket.emit("getSensors", (res) => {
-      console.log("getSensors socket response: ", res);
-      handleInitSensorData(res);
-    });
-    setSocket(newSocket);
-    // setManager(newManager);
+    handleSetSocket(newSocket);
   }, []);
 
   /*
-   * set connected state to true when sensorData is not empty
+   * set status state to true when sensorData is not empty
    */
   const debug = false;
   // called when sensorData state changes
@@ -102,11 +110,12 @@ export default function App() {
           colors: true,
         })}`
       );
+      handleSetStatus(Status.CONNECTED);
     }
     // if sensorData is not empty, then begin loading data into memory
-    if (Object.keys(sensorData).length > 0 && !connected) {
-      handleSetConnected(true);
-    }
+    // if (Object.keys(sensorData).length > 0 && !connected) {
+    //   handleSetConnected(true);
+    // }
   }, [sensorData]);
 
   /*
@@ -116,26 +125,29 @@ export default function App() {
     if (!socket) {
       return;
     }
+    socket.on("connect", () => {
+      console.log("app: connected to server");
+      handleSetStatus(Status.CONNECTED);
+    });
     // tracks connection status
     socket.on("disconnect", () => {
-      console.log("Disconnected from server");
-      handleSetConnected(false);
+      console.log("App: Disconnected from server");
+      handleSetStatus(Status.DISCONNECTED);
+      handleSetSessionData([]);
     });
     socket.on("sendSensorData", (newSensorData) => {
-      if (connected) {
-        Object.keys(newSensorData).forEach((sensorName) => {
-          const dataObj = {
-            name: sensorName,
-            data: newSensorData[sensorName],
-          };
-          // all data is stored into global context
-          // mapping from sensor name to list of dataObj
-          handleAppendSensorData(dataObj);
-        });
-        handleSetDataReceived();
-      }
+      Object.keys(newSensorData).forEach((sensorName) => {
+        const dataObj = {
+          name: sensorName,
+          data: newSensorData[sensorName],
+        };
+        // all data is stored into global context
+        // mapping from sensor name to list of dataObj
+        handleAppendSensorData(dataObj);
+      });
+      handleSetDataReceived();
     });
-  }, [connected]);
+  }, [socket]);
 
   // Setting page scroll to 0 when changing the route
   useEffect(() => {
@@ -163,7 +175,6 @@ export default function App() {
             color={darkMode ? "dark" : "info"}
             brand={(transparentSidenav && !darkMode) || whiteSidenav ? brandWhite : brandWhite}
             brandName="NUFSAE Telemetry"
-            socket={socket}
             routes={routes}
           />
           <Configurator />
@@ -172,7 +183,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/sessions" />} />
       </Routes>
     </ThemeProvider>
   );
