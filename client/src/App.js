@@ -1,11 +1,13 @@
 // TODO:
-// 1. connect with sessions: update sessions on reconnect, or add button to refresh sessions
-// 2. fetch all sensors data and load into graphs, graphs do not back all the way back up
-// 3. x-axis should just be current time parsed and displayed
-// 4. make sure page refreshes and tab changes behave correctly
+// fetch sessions on reconnect
+// preprocess all data in server, round x axis and units everything etc.
+// make sure time is correct and scale graph instead of scale according to index
+// 3. x-axis should just be current time parsed and displayed (but still need scale?)
 // 5. change dashboard layout to display 5 numbers on the right side: 5 rows
 // 6. add snack bar support for errors, socket events, alerts for data
 // 7. write batch file to launch both
+// MINOR TODO:
+// On scroll, bounces to index 0, but on second scroll we good
 
 import { useEffect } from "react";
 
@@ -77,8 +79,6 @@ export default function App() {
     const newManager = new Manager("http://localhost:3001", { autoConnect: false });
     const newSocket = newManager.socket("/");
     console.log("App: Component mounted.");
-    // FIXME: only fetches data on startup, but not if tab is reloaded
-    // TODO: sessions need to be fetched on reconnect?
     // or just dynamically updated
     newSocket.emit("startup", (res) => {
       console.log("App: startup response: ", res);

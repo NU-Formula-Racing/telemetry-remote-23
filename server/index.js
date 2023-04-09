@@ -84,7 +84,6 @@ sessionRepo.createTable()
       const mountSocketEmitters = (session_id) => {
         console.log(session_id)
         if (C.IS_TESTING){
-          // send generated data to client on 1s interval
           // FIXME: start time should refer to timestamp of session
           // if sessionId is not defined then data will be lost
           // potentially store in separate db first, then transfer? 
@@ -109,7 +108,7 @@ sessionRepo.createTable()
               // create new session
               console.log('creating new session')
               const date = new Date();
-              const month = new Intl.DateTimeFormat("en-US", options).format(date)
+              const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date)
               const sessionName = `Drive Session: ${month} ${date.getDate()} ${date.getHours()}:${date.getMinutes()}`
               sessionRepo.create(sessionName)
               .then((dataId) => { 
@@ -123,7 +122,7 @@ sessionRepo.createTable()
                 (session_id) => mountSocketEmitters(session_id)
               )
             } else {
-              // fetch session data
+              // fetch eisting session data
               console.log('fetching session data')
               sessionId = session_id;
               dataRepo.getBySessionId(session_id)
@@ -136,7 +135,7 @@ sessionRepo.createTable()
                 // populate the dictionary
                 for (var i = 0; i < sessionData.length; i++) {
                   sessionDataDict[sessionData[i].sensorName][0].push(sessionData[i].timestamp);
-                  sessionDataDict[sessionData[i].sensorName][1].push(sessionData[i].sensorValue);
+                  sessionDataDict[sessionData[i].sensorName][1].push(sessionData[i].sensorVal);
                 }
                 // send the dictionary to the client
                 callback({ name: sessionData[0].name, data: sessionDataDict })

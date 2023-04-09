@@ -2,6 +2,7 @@
 /* eslint-disable react/function-component-definition */
 
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // @mui material components
 import Grid from "@mui/material/Grid";
@@ -54,27 +55,29 @@ const ActionButton = ({ color, text, disabled, onClick }) => (
   </MDButton>
 );
 
-// TODO: memoize the table and to update only when sessiondata is updated
-
 function Tables() {
   const [sensorController, sensorDispatch] = useSensorController();
   const { status, sessionData, socket } = sensorController;
 
   const handleInitSensorData = (res) => initSensorData(sensorDispatch, res);
   const handleSetStatus = (res) => setStatus(sensorDispatch, res);
-  // TODO: handle timestamp for first created and last updated
+  // const handleSetSessionData = (res) => setSessionData(sensorDispatch, res);
+
+  const navigate = useNavigate();
   const handleSelect = (id) => {
     console.log(); // FIXME: state from row componenets will not update
-    // FIXME: need error response  to ask user to restart again
+    // FIXME: need error response to ask user to restart again
     if (socket && socket.connected) {
       handleSetStatus(Status.FETCHING);
       console.log("tables: send initializeSession");
       socket.emit("initializeSession", id, (res) => {
         console.log("tables: initializeSession response", res);
-        if (res.data.length > 1) {
+        if (Object.keys(res.data).length > 0 && res.data[Object.keys(res.data)[0]].length > 0) {
           handleInitSensorData(res.data);
+          console.log("tables: response length", res.data.length);
         }
         handleSetStatus(Status.LIVE);
+        navigate("/dashboard");
       });
     } else {
       console.log("tables: socket not connected");
@@ -174,7 +177,7 @@ function Tables() {
   }, []);
   useEffect(() => {
     setRows(getRows());
-  }, [sessionData]);
+  }, [sessionData, status]);
 
   // disable table buttons when not connected
   useEffect(() => {

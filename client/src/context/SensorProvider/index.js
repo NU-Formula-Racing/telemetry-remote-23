@@ -42,8 +42,10 @@ function reducer(state, action) {
         sensorData: {
           ...state.sensorData,
           [name]: [
-            // FIXME: cant just floor everything here
+            // FIXME: preprocess everything on the server
+            // x axis is time
             [...state.sensorData[name][0], Math.floor(data.time * 10) / 10],
+            // y axis is value
             [...state.sensorData[name][1], data.val],
           ],
         },
