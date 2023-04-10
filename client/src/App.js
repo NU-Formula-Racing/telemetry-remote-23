@@ -1,5 +1,4 @@
 // TODO:
-// fetch sessions on reconnect
 // preprocess all data in server, round x axis and units everything etc.
 // make sure time is correct and scale graph instead of scale according to index
 // 3. x-axis should just be current time parsed and displayed (but still need scale?)
@@ -128,6 +127,10 @@ export default function App() {
     socket.on("connect", () => {
       console.log("app: connected to server");
       handleSetStatus(Status.CONNECTED);
+      socket.emit("fetchSessionData", (res) => {
+        console.log("App: fetchSessionData response: ", res);
+        handleSetSessionData(res);
+      });
     });
     // tracks connection status
     socket.on("disconnect", () => {

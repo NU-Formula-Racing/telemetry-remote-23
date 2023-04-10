@@ -147,6 +147,10 @@ sessionRepo.createTable()
             }
           })
       });
+      socket.on('fetchSessionData', (callback) => {
+        sessionRepo.getAll()
+          .then((sessionData) => { callback(sessionData) })
+      })
       socket.on('deleteSession', (session_id) => {
         dataRepo.deleteBySession(session_id)
           .then(() => sessionRepo.delete(session_id))
