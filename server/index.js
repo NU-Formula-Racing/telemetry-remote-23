@@ -124,7 +124,16 @@ sessionRepo.createTable()
                 sessionId = dataId 
                 console.log('session id: ', sessionId)
                 console.log('data id: ', dataId)
-                callback({ name: sessionName, data: [] })
+                sensorMetaDataDict = {}
+                for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+                  // charts need 1 array per axis on graph 
+                  sensorMetaDataDict[C.SENSORS[i].name] = {
+                    unit: C.SENSORS[i].unit,
+                    max: C.SENSORS[i].max,
+                    warning: C.SENSORS[i].warning,
+                  };
+                }
+                callback({ name: sessionName, data: [], sensorMetaData: sensorMetaDataDict })
                 console.log('created new session')
                 return dataId
               }).then(
