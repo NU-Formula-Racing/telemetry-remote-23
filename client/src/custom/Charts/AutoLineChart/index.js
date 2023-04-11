@@ -103,11 +103,11 @@ function AutoLineChart({ color, titles, scale }) {
     }
     // a,d to pan
     // w,s to zoom
-    // q,e to select range
     // capital letters to zoom quicker
     // currently zoom and pans all charts, need prop or context to differentiate
     // extract this into util file?
 
+    // updates chart to new range and refreshes chart
     const setDataToRange = (reset = false) => {
       let { start, end } = range;
       if (reset) {
@@ -122,6 +122,14 @@ function AutoLineChart({ color, titles, scale }) {
         return { ...dataset, data: newData };
       });
       chart.data = { labels, datasets };
+
+      // if (end - start > 100) {
+      //   chart.options.plugins.decimation.enabled = true;
+      //   chart.options.plugins.decimation.algorithm = "lttb";
+      //   chart.options.plugins.decimation.samples = 50;
+      // } else {
+      //   chart.options.plugins.decimation.enabled = false;
+      // }
       chart.update();
     };
 
@@ -280,6 +288,15 @@ function AutoLineChart({ color, titles, scale }) {
       );
     }
     setDescription(sumOfValue / titles.length);
+
+    // const { start, end } = range;
+    // if (end - start > 100) {
+    //   chart.options.plugins.decimation.enabled = true;
+    //   chart.options.plugins.decimation.algorithm = "lttb";
+    //   chart.options.plugins.decimation.samples = 50;
+    // } else {
+    //   chart.options.plugins.decimation.enabled = false;
+    // }
     chart.update();
   }, [dataReceived]);
 

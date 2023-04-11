@@ -54,6 +54,10 @@ function configs(titles) {
         legend: {
           display: false,
         },
+        // decimation: {
+        //   enabled: false,
+        //   algorithm: "min-max",
+        // },
         zoom: {
           pan: {
             enabled: false,
@@ -145,6 +149,7 @@ function configs(titles) {
           },
         },
         x: {
+          // type: "time",
           grid: {
             drawBorder: false,
             display: false,

@@ -1,9 +1,10 @@
 // TODO:
 // preprocess all data in server, round x axis and units everything etc.
 // make sure time is correct and scale graph instead of scale according to index
+
 // 3. x-axis should just be current time parsed and displayed (but still need scale?)
-// 5. change dashboard layout to display 5 numbers on the right side: 5 rows
 // 6. add snack bar support for errors, socket events, alerts for data
+// 6.5 add tutorial on the settings and side nav
 // 7. write batch file to launch both
 // MINOR TODO:
 // On scroll, bounces to index 0, but on second scroll we good

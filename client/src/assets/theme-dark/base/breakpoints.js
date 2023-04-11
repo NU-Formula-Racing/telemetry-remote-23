@@ -22,11 +22,13 @@ Coded by www.creative-tim.com
 const breakpoints = {
   values: {
     xs: 0,
+    sp: 350,
     sm: 576,
     md: 768,
     lg: 992,
     xl: 1200,
-    xxl: 1400,
+    xxl: 1700,
+    xxxl: 2400,
   },
 };
 
