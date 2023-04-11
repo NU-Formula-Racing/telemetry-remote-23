@@ -24,6 +24,7 @@ import {
   initSensorData,
   setStatus,
   setSessionData,
+  setSensorMetaData,
 } from "context/SensorProvider";
 
 const Session = ({ name, id }) => (
@@ -61,6 +62,7 @@ function Tables() {
 
   const handleInitSensorData = (res) => initSensorData(sensorDispatch, res);
   const handleSetStatus = (res) => setStatus(sensorDispatch, res);
+  const handleSetSensorMetaData = (res) => setSensorMetaData(sensorDispatch, res);
   // const handleSetSessionData = (res) => setSessionData(sensorDispatch, res);
 
   const navigate = useNavigate();
@@ -77,6 +79,7 @@ function Tables() {
           console.log("tables: response length", res.data.length);
         }
         handleSetStatus(Status.LIVE);
+        handleSetSensorMetaData(res.sensorMetaData);
         navigate("/dashboard");
       });
     } else {

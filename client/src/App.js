@@ -1,8 +1,5 @@
 // TODO:
-// preprocess all data in server, round x axis and units everything etc.
-// make sure time is correct and scale graph instead of scale according to index
-
-// 3. x-axis should just be current time parsed and displayed (but still need scale?)
+// 5. add meta data for units max, error, etc
 // 6. add snack bar support for errors, socket events, alerts for data
 // 6.5 add tutorial on the settings and side nav
 // 7. write batch file to launch both
@@ -43,6 +40,7 @@ import {
   setDataReceived,
   setStatus,
   setSessionData,
+  setSensorMetaData,
 } from "context/SensorProvider";
 
 // Images
@@ -70,6 +68,7 @@ export default function App() {
   const handleInitSensorData = (res) => initSensorData(sensorDispatch, res);
   const handleAppendSensorData = (res) => appendSensorData(sensorDispatch, res);
   const handleSetDataReceived = () => setDataReceived(sensorDispatch);
+  const handleSetSensorMetaData = (res) => setSensorMetaData(sensorDispatch, res);
 
   /*
    * initialize socket connection
@@ -85,6 +84,7 @@ export default function App() {
       handleSetSessionData(res.sessionList);
       handleInitSensorData(res.initValues);
       handleSetStatus(Status.CONNECTED);
+      handleSetSensorMetaData(res.sensorMetaData);
     });
     // prevents socket from long polling
     newManager.on("error", () => {

@@ -76,7 +76,16 @@ sessionRepo.createTable()
               // charts need 1 array per axis on graph 
               initValues[C.SENSORS[i].name] = [[0.01], [0.01]];
             }
-            res = { initValues: initValues, sessionList: sessionList }
+            sensorMetaDataDict = {}
+            for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+              // charts need 1 array per axis on graph 
+              sensorMetaDataDict[C.SENSORS[i].name] = {
+                unit: C.SENSORS[i].unit,
+                max: C.SENSORS[i].max,
+                warning: C.SENSORS[i].warning,
+              };
+            }
+            res = { initValues: initValues, sessionList: sessionList, sensorMetaData: sensorMetaDataDict }
             callback(res);
           });
       });
@@ -137,11 +146,21 @@ sessionRepo.createTable()
                   sessionDataDict[sessionData[i].sensorName][0].push(sessionData[i].timestamp);
                   sessionDataDict[sessionData[i].sensorName][1].push(sessionData[i].sensorVal);
                 }
+                sensorMetaDataDict = {}
+                for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+                  // charts need 1 array per axis on graph 
+                  sensorMetaDataDict[C.SENSORS[i].name] = {
+                    unit: C.SENSORS[i].unit,
+                    max: C.SENSORS[i].max,
+                    warning: C.SENSORS[i].warning,
+                  };
+                }
                 // send the dictionary to the client
-                callback({ name: sessionData[0].name, data: sessionDataDict })
+                callback({ name: sessionData[0].name, data: sessionDataDict, sensorMetaData: sensorMetaDataDict })
                 console.log('fetched session data')
                 return session_id
               }).then(
+                // start feeding live data
                 (session_id) => mountSocketEmitters(session_id)
               )
             }

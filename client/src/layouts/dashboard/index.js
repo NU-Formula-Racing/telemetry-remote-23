@@ -22,7 +22,7 @@ function Dashboard() {
   const [muiController] = useMaterialUIController();
   const { darkMode } = muiController;
   const [sensorController] = useSensorController();
-  const { sensorData } = sensorController;
+  const { sensorData, sensorMetaData } = sensorController;
   const sensorNames = Object.keys(sensorData);
   const sensorGroup1 = [0, 1, 2, 3]; // Wheel Speed
   const sensorGroup2 = [4, 5, 6, 7]; // Wheel Temp
@@ -44,7 +44,8 @@ function Dashboard() {
 
   const renderCards = (sensorList) => {
     // check if data from sockets have arrived yet
-    const valid = sensorNames.length > sensorList[sensorList.length - 1];
+    const sensorDataValid = sensorNames.length > sensorList[sensorList.length - 1];
+    const sensorMetaDataValid = sensorMetaData && Object.keys(sensorMetaData).length > 0;
     const cardProps = {
       sensorLabels: sensorList.map((i) => `${i}`),
       sensorGroupData: sensorList,
@@ -52,15 +53,16 @@ function Dashboard() {
       unit: "km/h",
       max: 100,
     };
-    if (valid) {
+    if (sensorDataValid && sensorMetaDataValid) {
       cardProps.sensorLabels = sensorList.map((i) => sensorNames[i]);
-
       cardProps.sensorGroupData = sensorList.map((i) => {
         // get the last element of the array
         const dataEntry = sensorData[sensorNames[i]];
         const lastData = dataEntry[1][dataEntry[1].length - 1];
         return lastData;
       });
+      cardProps.unit = sensorMetaData[sensorNames[sensorList[0]]].unit;
+      cardProps.max = sensorMetaData[sensorNames[sensorList[0]]].max;
 
       // const dataEntry = sensorData[sensorNames[i]];
       // const lastData = dataEntry[1][dataEntry[1].length - 1];

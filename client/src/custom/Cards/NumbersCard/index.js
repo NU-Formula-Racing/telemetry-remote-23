@@ -112,7 +112,7 @@ function NumbersCard({ sensorLabels, sensorGroupData, unit, max }) {
         </Grid>
         <Grid item xs={6} sp={7} display="flex" justifyContent="center" flexDirection="column">
           <MDBox pb={5} ml={1}>
-            <MDTypography variant="h5" fontWeight="light" alignContent="center" pb={1}>
+            <MDTypography variant="h6" fontWeight="light" alignContent="center" pb={1}>
               {parseName(sensorLabels[0])}
             </MDTypography>
             <MDTypography
