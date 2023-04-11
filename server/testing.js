@@ -11,27 +11,37 @@ function sendFakeData(socket, dataRepo, origin, sessionID) {
     return
   }
   dataObj = {}
-  const curTime = Date.now() / 1000
-  const time = Math.floor((curTime - origin) * 10) / 10;
+  
+
+  const now = new Date(); // Get current date and time
+  const cstOffset = 0 * 60 * 60 * 1000; // Offset in milliseconds for CST time zone
+  const cstTime = new Date(now.getTime() + cstOffset); // insert timezone adjusted unix timestamp here
+  const hours = cstTime.getHours().toString().padStart(2, '0');
+  const minutes = cstTime.getMinutes().toString().padStart(2, '0');
+  const seconds = cstTime.getSeconds().toString().padStart(2, '0');
+  const milliseconds = cstTime.getMilliseconds().toString().padStart(3, '0');
+
+  const formattedTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+
   for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
     const curVal = getSmoothNumber(prev[i]);
     dataObj[C.SENSOR_NAMES[i]] = {
       'val': curVal,
-      'time': time,
+      'time': formattedTime,
     };
     prev[i] = curVal;
     // save data to local database
     sqlDataObj = {
       sensorName: C.SENSOR_NAMES[i],
       sensorVal: curVal,
-      timestamp: time,
+      timestamp: formattedTime,
       sessionId: sessionID
     }
     const { sensorName, sensorVal, timestamp, sessionId } = sqlDataObj
     dataRepo.create(sensorName, sensorVal, timestamp, sessionId)
   }
   // send data to client
-  console.log("testing: DataObj sending to client @ t=", curTime);
+  console.log("testing: DataObj sending to client @ t=", formattedTime);
   // console.log(`\t${C.SENSOR_NAMES[0]}: ${dataObj[C.SENSOR_NAMES[0]].val}`)
   socket.emit('sendSensorData',  dataObj);
 }

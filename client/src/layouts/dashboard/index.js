@@ -46,7 +46,7 @@ function Dashboard() {
     // check if data from sockets have arrived yet
     const valid = sensorNames.length > sensorList[sensorList.length - 1];
     const cardProps = {
-      sensorLabels: ["UU", "UU", "UU", "UU"],
+      sensorLabels: sensorList.map((i) => `${i}`),
       sensorGroupData: sensorList,
       // TODO: create metadata state in context for each sensor
       unit: "km/h",

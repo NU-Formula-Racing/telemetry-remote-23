@@ -160,9 +160,9 @@ function configs(titles) {
             display: true,
             color: "#f8f9fa",
             padding: 5,
-            maxRotation: 0,
             minRotation: 0,
-            maxTicksLimit: 10,
+            maxRotation: 0,
+            maxTicksLimit: 5,
             autoSkip: true,
             font: {
               size: 14,
@@ -170,6 +170,12 @@ function configs(titles) {
               family: "Roboto",
               style: "normal",
               lineHeight: 2,
+            },
+            callback: function (val) {
+              // const newThis = this;
+              if (!this || this === undefined) return val;
+
+              return this.getLabelForValue(val).substr(0, 8);
             },
           },
         },

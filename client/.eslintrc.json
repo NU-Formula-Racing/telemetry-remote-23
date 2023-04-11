@@ -24,6 +24,7 @@
     "react/react-in-jsx-scope": "off",
     "react/forbid-prop-types": "off",
     "no-case-declarations": "off",
+    "object-shorthand": "off",
     "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
     "react/jsx-props-no-spreading": [
       1,

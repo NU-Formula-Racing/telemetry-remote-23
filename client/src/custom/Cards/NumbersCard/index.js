@@ -38,6 +38,9 @@ const parseName = (str) => {
 };
 
 const parseLabel = (str) => {
+  if (!str || str.indexOf("_") === -1) {
+    return str;
+  }
   const label = str.split("_")[0];
   if (label.length <= 4) return label;
   return label.substring(0, 3);
@@ -55,7 +58,7 @@ function NumbersCard({ sensorLabels, sensorGroupData, unit, max }) {
     <Card style={{ marginLeft: "1px", height: "14.5rem" }}>
       <Grid container spacing={0}>
         {sensorLabels.map((sensor, index) => (
-          <Grid item xs={3} key={sensorGroupData[index]}>
+          <Grid item xs={3} key={sensor}>
             <MDBox display="flex" justifyContent="space-between" flexDirection="column" pt={1}>
               <MDTypography variant="button" fontWeight="light" color="text" textAlign="center">
                 {parseLabel(sensor)}

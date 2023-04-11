@@ -193,7 +193,6 @@ function emitData(data, socket) {
   let dataObj = dataSlicing(data);
   console.log("DataObj sending to client: ", dataObj);
 
-  // TODO: need to change this to use persistent data
   dynamoDBHelper.sendDataToDynamoDB(dataObj);
 
   // send data to client on sendSensorData event
