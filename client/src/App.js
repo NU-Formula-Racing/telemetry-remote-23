@@ -1,5 +1,5 @@
 // TODO:
-// 5. add meta data for units max, error, etc
+// 5.5 floor charts in numnbers to 100 max
 // 6. add snack bar support for errors, socket events, alerts for data
 // 6.5 add tutorial on the settings and side nav
 // 7. write batch file to launch both
