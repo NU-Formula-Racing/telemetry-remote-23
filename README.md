@@ -6,7 +6,7 @@ execute the `initApp.bat` file from file explorer. Close the command prompt wind
 
 ## Usage
 
-execute the `runApp.bat` file from file explorer. If you need to restart the app, remember to close all command prompt windows before running the `runApp.bat` file again.
+execute the `runApp.bat` file from file explorer. If you need to restart the app, remember to run `killApp.bat` before running the `runApp.bat` file again.
 <br>
 The instructions below can also be found in the settings page of the app. (Click top right gear icon)
 
@@ -29,7 +29,7 @@ Need to reslect the same session after. <br>
 1. Switch tabs on the side nav.
 2. Disconnect and reconnect to server.
 3. Refresh the tab.
-4. Relaunch the app entirely. 
+4. Relaunch the app entirely. (run `killApp.bat` and then `runApp.bat`)
 5. Ping on slack.
 
 ![Alt text](./screenshot.png "Screenshot")
