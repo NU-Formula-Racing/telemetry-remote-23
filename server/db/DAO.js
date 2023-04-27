@@ -9,9 +9,9 @@ class DAO {
   constructor(dbFilePath) {
     this.db = new sqlite3.Database(dbFilePath, (err) => {
       if (err) {
-        console.log('Could not connect to database', err)
+        console.log('DAO: Could not connect to database', err)
       } else {
-        console.log('Connected to database at ' + dbFilePath)
+        console.log('DAO: Connected to database at ' + dbFilePath)
       }
     })
     this.db.run('PRAGMA foreign_keys = ON')
@@ -23,7 +23,7 @@ class DAO {
     return new Promise((resolve, reject) => {
       this.db.run(sql, params, function (err) {
         if (err) {
-          console.log('Error running sql run():' + sql)
+          console.log('DAO: Error running sql run():' + sql)
           console.log(err)
           reject(err)
         } else {
@@ -38,7 +38,7 @@ class DAO {
     return new Promise((resolve, reject) => {
       this.db.get(sql, params, (err, result) => {
         if (err) {
-          console.log('Error running sql get(): ' + sql)
+          console.log('DAO: Error running sql get(): ' + sql)
           console.log(err)
           reject(err)
         } else {
@@ -53,7 +53,7 @@ class DAO {
     return new Promise((resolve, reject) => {
       this.db.all(sql, params, (err, rows) => {
         if (err) {
-          console.log('Error running sql all(): ' + sql)
+          console.log('DAO: Error running sql all(): ' + sql)
           console.log(err)
           reject(err)
         } else {

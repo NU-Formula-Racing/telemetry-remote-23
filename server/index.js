@@ -1,31 +1,3 @@
-/***
-TODO:
-- use SQLite to persist data
-  - popup to choose new session or use existing session
-  - button to reset data in the client for every new session
-  - button to start new session and end current session
-  - button to remove old data? 
-
-- Use charts.js to display data
-  - revamp the entire UI
-
-- Features:
-  - automatically rescaling on new data
-  - easy scrolling and zooming
-  - can move and display graphs easily
-  - overlay graphs
-  - display number and names clearly
-  - make display longer and can stack more
-  - have different tabs with different views
-
-- Secondary:
-  - add separate live data view with only numbers
-  - try to make it look like images online
-  - containerize + k8s for better reliability and easier deployment?
-  - electron app for desktop? Can also use batch file to run the app
-  - button to restart server? 
-  - show server logs on client side
-***/
 // imports for node modules
 const express = require("express");
 const http = require("http");
@@ -79,13 +51,144 @@ const START_TIME = Date.now() / 1000;
 const dao = new DAO(C.DB_PATH)
 const sessionRepo = new SessionRepository(dao)
 const dataRepo = new DataRepository(dao)
-let sessionId
+
+let sessionId // should store current sessionID
+let sessionList // should store all available sessions on the 
+// first create tables. if exist nothing happens
 sessionRepo.createTable()
   .then(() => dataRepo.createTable())
-  .then(() => sessionRepo.deleteAll()) // clears previous data
-  // FIXME: this creates a new session every time the server is restarted
-  .then(() => sessionRepo.create(`test session ${new Date().getHours()} : ${new Date().getMinutes()}`))
-  .then((dataId) => { sessionId = dataId })
+  // .then(() => sessionRepo.deleteAll()) // clears previous data
+  // .then(() => sessionRepo.create(`test session ${new Date().getHours()} : ${new Date().getMinutes()}`))
+  // get sessionID
+  // .then((dataId) => { sessionId = dataId })
+  // register socket events
+  .then(() => {
+    io.on('connection', (socket) => {
+      console.log(`${socket.id} client connected!`);
+
+      // send sensor names and session list
+      socket.on('startup', (callback) => {
+        sessionRepo.getAll()
+          .then((sessionData) => { sessionList = sessionData })
+          .then(() => {
+            initValues = {}
+            for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+              // charts need 1 array per axis on graph 
+              initValues[C.SENSORS[i].name] = [[0.01], [0.01]];
+            }
+            sensorMetaDataDict = {}
+            for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+              // charts need 1 array per axis on graph 
+              sensorMetaDataDict[C.SENSORS[i].name] = {
+                unit: C.SENSORS[i].unit,
+                max: C.SENSORS[i].max,
+                warning: C.SENSORS[i].warning,
+              };
+            }
+            res = { initValues: initValues, sessionList: sessionList, sensorMetaData: sensorMetaDataDict }
+            callback(res);
+          });
+      });
+
+      const mountSocketEmitters = (session_id) => {
+        console.log(session_id)
+        if (C.IS_TESTING){
+          // FIXME: start time should refer to timestamp of session
+          // if sessionId is not defined then data will be lost
+          // potentially store in separate db first, then transfer? 
+          setInterval(
+            testing.sendFakeData, C.DATA_PERIOD * 1000, 
+            socket, dataRepo, START_TIME, session_id
+          )
+        } else {
+          // read data from serial port and send to client
+          laptopPort.on('data', function (data) {
+            console.log(data);
+            emitData(data, socket);
+          });
+        }
+      }
+
+      // fetch sessionID send session data or empty session
+      socket.on('initializeSession', (session_id, callback) => {
+        sessionRepo.getById(session_id)
+          .then((sessionData) => {
+            if ((typeof sessionData === 'undefined') || sessionData.length === 0) {
+              // create new session
+              console.log('creating new session')
+              const date = new Date();
+              const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date)
+              const sessionName = `Drive Session: ${month} ${date.getDate()} ${date.getHours()}:${date.getMinutes()}`
+              sessionRepo.create(sessionName)
+              .then((dataId) => { 
+                sessionId = dataId 
+                console.log('session id: ', sessionId)
+                console.log('data id: ', dataId)
+                sensorMetaDataDict = {}
+                for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+                  // charts need 1 array per axis on graph 
+                  sensorMetaDataDict[C.SENSORS[i].name] = {
+                    unit: C.SENSORS[i].unit,
+                    max: C.SENSORS[i].max,
+                    warning: C.SENSORS[i].warning,
+                  };
+                }
+                callback({ name: sessionName, data: [], sensorMetaData: sensorMetaDataDict })
+                console.log('created new session')
+                return dataId
+              }).then(
+                (session_id) => mountSocketEmitters(session_id)
+              )
+            } else {
+              // fetch eisting session data
+              console.log('fetching session data')
+              sessionId = session_id;
+              dataRepo.getBySessionId(session_id)
+              .then((sessionData) => {
+                // initialize the dictionary
+                let sessionDataDict = {}
+                for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
+                  sessionDataDict[C.SENSORS[i].name] = [[], []];
+                }
+                // populate the dictionary
+                for (var i = 0; i < sessionData.length; i++) {
+                  sessionDataDict[sessionData[i].sensorName][0].push(sessionData[i].timestamp);
+                  sessionDataDict[sessionData[i].sensorName][1].push(sessionData[i].sensorVal);
+                }
+                sensorMetaDataDict = {}
+                for (var i = 0; i < C.NUM_OF_SENSORS; i++) { 
+                  // charts need 1 array per axis on graph 
+                  sensorMetaDataDict[C.SENSORS[i].name] = {
+                    unit: C.SENSORS[i].unit,
+                    max: C.SENSORS[i].max,
+                    warning: C.SENSORS[i].warning,
+                  };
+                }
+                // send the dictionary to the client
+                callback({ name: sessionData[0].name, data: sessionDataDict, sensorMetaData: sensorMetaDataDict })
+                console.log('fetched session data')
+                return session_id
+              }).then(
+                // start feeding live data
+                (session_id) => mountSocketEmitters(session_id)
+              )
+            }
+          })
+      });
+      socket.on('fetchSessionData', (callback) => {
+        sessionRepo.getAll()
+          .then((sessionData) => { callback(sessionData) })
+      })
+      socket.on('deleteSession', (session_id) => {
+        dataRepo.deleteBySession(session_id)
+          .then(() => sessionRepo.delete(session_id))
+          .then(() => {console.log(`session deleted ${session_id}`)} )
+      });
+      socket.on('disconnect', () => {
+        console.log('client disconnected');
+      });
+    });
+  })
   .catch((err) => { console.log('SQLite on create Error: ' + err) })
 
 // Miscellaneous - Real
@@ -104,37 +207,6 @@ sessionRepo.createTable()
 //   }
 // })
 
-// ****************************** SOCKET IO LISTENER ***************************************
-io.on('connection', (socket) => {
-  console.log(`${socket.id} client connected!`);
-
-  // send list of sensor names and initial values to client
-  socket.on('getSensors', (callback) => {
-    initValues = {}
-    for (var i = 0; i < C.NUM_OF_SENSORS; i++) {
-      initValues[C.SENSORS[i].name] = [(0.01,0.01)];
-    }
-    callback(initValues);
-  });
-
-  // send sensor data to client
-  if (C.IS_TESTING){
-    // send generated data to client on 1s interval
-    setInterval(
-      testing.sendFakeData, C.DATA_PERIOD * 1000, 
-      socket, dataRepo, sessionId)
-  } else {
-    // read data from serial port and send to client
-    laptopPort.on('data', function (data) {
-      console.log(data);
-      emitData(data, socket);
-    });
-  }
-
-  socket.on('disconnect', () => {
-    console.log('client disconnected');
-  });
-});
 
 // ****************************** DATA PROCESSING ***************************************
 // Helper to proces and emit data into the socket
@@ -149,7 +221,6 @@ function emitData(data, socket) {
   let dataObj = dataSlicing(data);
   console.log("DataObj sending to client: ", dataObj);
 
-  // TODO: need to change this to use persistent data
   dynamoDBHelper.sendDataToDynamoDB(dataObj);
 
   // send data to client on sendSensorData event

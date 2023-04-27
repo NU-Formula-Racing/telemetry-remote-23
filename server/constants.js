@@ -2,30 +2,33 @@
 
 const DB_PATH = './server/db/database.sqlite3'
 const IS_TESTING = true;
-const DATA_PERIOD = 1; // seconds
+const DATA_PERIOD = 0.2; // seconds
 
 
 //****************************** SENSORS ***************************************
 class Sensor {
-    constructor(name, type, bias, scale, bytes_length) {
+    constructor(name, type, bias, scale, bytes_length, unit, max, warning) {
         this.name = name;
         this.type = type;
         this.bias = bias;
         this.scale = scale;
         this.bytes_length = bytes_length;
+        this.unit = unit;
+        this.max = max;
+        this.warning = warning;
     }
 }
 
-const FL_WEHEEL_SPEED = new Sensor("FL_WHEEL_SPEED", "float", 0, 0.1, 2);
-const FR_WHEEL_SPEED = new Sensor("FR_WHEEL_SPEED", "float", 1, 0.1, 2);
-const BL_WHEEL_SPEED = new Sensor("BL_WHEEL_SPEED", "float", 0, 0.1, 2);
-const BR_WHEEL_SPEED = new Sensor("BR_WHEEL_SPEED", "float", 1, 0.1, 2);
-const FL_BRAKE_TEMP = new Sensor("FL_BRAKE_TEMP", "float", 0, 0.1, 2);
-const FR_BRAKE_TEMP = new Sensor("FR_BRAKE_TEMP", "float", 1, 0.1, 2);
-const BL_BRAKE_TEMP = new Sensor("BL_BRAKE_TEMP", "float", 0, 0.1, 2);
-const BR_BRAKE_TEMP = new Sensor("BR_BRAKE_TEMP", "float", 1, 0.1, 2);
-const F_BRAKE_PRESSURE = new Sensor("F_BRAKE_PRESSURE", "int", 0, 1, 2);
-const R_BRAKE_PRESSURE = new Sensor("R_BRAKE_PRESSURE", "int", 1, 1, 2);
+const FL_WEHEEL_SPEED = new Sensor("FL_WHEEL_SPEED", "float", 0, 0.1, 2, "mph", 200, 150);
+const FR_WHEEL_SPEED = new Sensor("FR_WHEEL_SPEED", "float", 1, 0.1, 2, "mph", 200, 150);
+const BL_WHEEL_SPEED = new Sensor("BL_WHEEL_SPEED", "float", 0, 0.1, 2, "mph", 200, 150);
+const BR_WHEEL_SPEED = new Sensor("BR_WHEEL_SPEED", "float", 1, 0.1, 2, "mph", 200, 150);
+const FL_BRAKE_TEMP = new Sensor("FL_BRAKE_TEMP", "float", 0, 0.1, 2, "F", 200, 150);
+const FR_BRAKE_TEMP = new Sensor("FR_BRAKE_TEMP", "float", 1, 0.1, 2, "F", 200, 150);
+const BL_BRAKE_TEMP = new Sensor("BL_BRAKE_TEMP", "float", 0, 0.1, 2, "F", 200, 150);
+const BR_BRAKE_TEMP = new Sensor("BR_BRAKE_TEMP", "float", 1, 0.1, 2, "F", 200, 150);
+const F_BRAKE_PRESSURE = new Sensor("F_BRAKE_PRESSURE", "int", 0, 1, 2, "psi", 200, 150);
+const R_BRAKE_PRESSURE = new Sensor("R_BRAKE_PRESSURE", "int", 1, 1, 2, "psi", 200, 150);
 
 const SENSORS = [
     FL_WEHEEL_SPEED, FR_WHEEL_SPEED, BL_WHEEL_SPEED, BR_WHEEL_SPEED,
