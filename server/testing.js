@@ -2,7 +2,7 @@ const C = require('./constants.js');
 
 // start data list with init values based on bias
 prev = []
-C.SENSORS.forEach(sensor => { prev.push(sensor.bias); })
+C.SENSORS.forEach(sensor => { prev.push(0); }) // no bias now
 
 // helper to generate fake data
 function sendFakeData(socket, dataRepo, origin, sessionID) {
@@ -38,11 +38,12 @@ function sendFakeData(socket, dataRepo, origin, sessionID) {
       sessionId: sessionID
     }
     const { sensorName, sensorVal, timestamp, sessionId } = sqlDataObj
-    dataRepo.create(sensorName, sensorVal, timestamp, sessionId)
+    // dataRepo.create(sensorName, sensorVal, timestamp, sessionId)
   }
   // send data to client
   console.log("testing: DataObj sending to client @ t=", formattedTime);
   // console.log(`\t${C.SENSOR_NAMES[0]}: ${dataObj[C.SENSOR_NAMES[0]].val}`)
+  console.log(dataObj);
   socket.emit('sendSensorData',  dataObj);
 }
 

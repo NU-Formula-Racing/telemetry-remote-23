@@ -4,7 +4,13 @@ const http = require("http");
 const cors = require("cors");
 const socketio = require('socket.io');
 const util = require('util');
-const { SerialPort } = require("serialport");
+const { SerialPort } = require('serialport')
+const { ReadlineParser } = require('@serialport/parser-readline')
+// const { autoDetect } = require('@serialport/bindings-cpp')
+// const { DarwinBindingInterface } = require('@serialport/bindings');
+// const Binding = autoDetect()
+// const { Readline } = SerialPort.parsers.Readline;
+// imports for AWS
 const { DynamoDB } = require("@aws-sdk/client-dynamodb");
 const dynamoDBHelper = require('./dynamodb.js');
 // imports for SQLite
@@ -18,14 +24,85 @@ const testing = require('./testing.js');
 // ***************** SETUP SERVER, SOCKETS & DB *****************
 // List of all possible ports as far as we know:
 // 1. /dev/tty.usbmodem115442301
-const laptopPort = new SerialPort({
-  path: '/dev/tty.usbmodem115442301',
-  baudRate: 9600
-  }, function (err) { 
-    if (err) {
-      return console.log('SerialPort Error on create: ', err.message)
+
+// if (navigator.userAgent.indexOf('Mac OS X') != -1) {
+//   alert("Mac"); // You can do whatever here
+// } else {
+//   alert("Windows"); // You can do whatever here
+// }
+
+// // Function for checking port availability
+// console.log(SerialPort.list());
+
+// configure and start serial port
+var laptopPort = null
+
+if (!C.IS_TESTING){
+
+  laptopPort = new SerialPort({
+    path: '/dev/tty.usbmodem115442501',
+    baudRate: 9600,
+    }, function (err) { 
+      if (err) {
+        return console.log('SerialPort Error on create: ', err.message)
+      } else {
+        return console.log('SerialPort created successfully')
+      }
+  });
+  
+  const ports = DarwinBinding.list()
+  
+  laptopPort.on('open', function () {
+    console.log('Port opened on ' + laptopPort.path);
+  })
+  
+  const parser = laptopPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+
+
+// Handle port disconnects
+laptopPort.on('close', function(err){
+
+  if (err.disconnected) {
+    console.log('Port disconnected');
+
+    // Attempt to reconnect
+    while(true){
+
+      console.log("Platform binding")
+      console.log(SerialPort.binding)
+      console.log('List')
+      console.log(SerialPort.list())
+
+      try{
+        laptopPort = new SerialPort({
+          path: '/dev/tty.usbmodem115442501',
+          baudRate: 9600,
+          }, function (err) { 
+            if (err) {
+              return console.log('SerialPort Error on create: ', err.message)
+            } else {
+              return console.log('SerialPort created successfully')
+            }
+        });
+      } catch(err) {
+        console.log('SerialPort Error on Reconnect: ', err.message)
+      } finally {
+        console.log('SerialPort Reconnect Attempted')
+      }
+
+      console.log(laptopPort.isOpen)
+
+      if (laptopPort.isOpen) {
+        console.log('Port opened on ' + laptopPort.path);
+        break;
+      }
     }
-});
+  }
+
+})
+
+}
+
 
 // configure and start node.js server
 console.log('Starting express server...')
@@ -33,7 +110,7 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const corsOptions = {
   // why do we use port 63613 here?
-  origin: "http://localhost:63613",
+  origin: "http://localhost:50945",
   credentials:true,            
   // allowedHeaders: ["header"],
 }
@@ -44,6 +121,7 @@ const server = http.createServer(app);
 server.listen(PORT, () => {
   console.log(`server listening on port ${PORT}`);
 });
+
 const io = socketio(server,{cors:{origin:"*"}});
 const START_TIME = Date.now() / 1000;
 
@@ -102,10 +180,7 @@ sessionRepo.createTable()
           )
         } else {
           // read data from serial port and send to client
-          laptopPort.on('data', function (data) {
-            console.log(data);
-            emitData(data, socket);
-          });
+          readDataFromPort(socket, dataRepo, session_id);
         }
       }
 
@@ -191,136 +266,94 @@ sessionRepo.createTable()
   })
   .catch((err) => { console.log('SQLite on create Error: ' + err) })
 
-// Miscellaneous - Real
-// const scale = 10;
-// const bias = -40;
+// Issues to discuss with Marco
+// 1. How to pipe the data from serial port to io port? 2 infinite loops issue [DONE]
+// 2. Port 3000 problem, always on [DONE]
+// 3. Naming Standard for Sensors [DONE]
 
+function readDataFromPort(socket, dataRepo, sessionID) {
 
-// Notes:
-// 1. First 8 shorts -> floats
-// 2. Next 3 shorts -> integers
+  parser.on('data', function(data){
 
-// Check if data reading in from port is erroring
-// laptopPort.open(function(err) {
-//   if (err) {
-//     return console.log('Error opening port: ', err.message);
-//   }
-// })
+    let dataObj = {};
+
+    // Attempt to parse the data into JSON format first
+    try{
+      let jsonObj = JSON.parse(data);
+      let processedData = processData(jsonObj, dataRepo, sessionID);
+      let fastData = processedData.fast;
+
+      // console.log(jsonObj);
+      console.log(fastData);
+
+      emitData(fastData, socket); // emit fast data to client
+
+      // now send data to client on sendSensorData event
+    } catch (e) {
+      console.log("Error parsing data: ", e);
+    }
+
+    
+
+  })
+}
 
 
 // ****************************** DATA PROCESSING ***************************************
 // Helper to proces and emit data into the socket
 function emitData(data, socket) {
-  if (data.length <= 1){
-    return;
-  }
-  console.log("Raw data input: ", data.toString());
 
-  // dataObj (dictionary): sensorName -> dataList
-  // dataList (array): [...,[time, val],...]
-  let dataObj = dataSlicing(data);
-  console.log("DataObj sending to client: ", dataObj);
-
-  dynamoDBHelper.sendDataToDynamoDB(dataObj);
+  // dynamoDBHelper.sendDataToDynamoDB(dataObj);
 
   // send data to client on sendSensorData event
-  socket.emit('sendSensorData',  dataObj);
+  socket.emit('sendSensorData', data);
 }
 
-// preprocess raw data from bytes array into dataobj dictionary
-function dataSlicing(data){
-  let dataObj = {};
-  // FIXME: should use timestamp from the data instead
-  const curTime = Date.now() / 1000;
+// dataJsonObj (dictionary) -> socketDataType
+// TODO: need to get time from the car instead of using local system current time
+function processData(jsonObj, dataRepo, sessionID){
 
-  info_ind = 0; // index for the miscellaneous information arrays
-  i = 1; // data index
+  let dataObjFast = {};
+  let dataObjSlow = jsonObj.slow;
 
-  // while loop for getting data
-  while (i < data.length){
+  const now = new Date(); // Get current date and time
+  const cstOffset = 0 * 60 * 60 * 1000; // Offset in milliseconds for CST time zone
+  const cstTime = new Date(now.getTime() + cstOffset); // insert timezone adjusted unix timestamp here
+  const hours = cstTime.getHours().toString().padStart(2, '0');
+  const minutes = cstTime.getMinutes().toString().padStart(2, '0');
+  const seconds = cstTime.getSeconds().toString().padStart(2, '0');
+  const milliseconds = cstTime.getMilliseconds().toString().padStart(3, '0');
 
-    // break after reaching terminating bit 
-    if (i == data.length - 1){
-      break;
+  const formattedTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
+
+  const fastData= jsonObj['fast'];
+
+  // Process Fast data first
+  for (var i = 0; i < C.SENSORS.length; i++) {
+
+    let key = C.SENSOR_NAMES[i];
+    let sensorName = key;
+    let sensorVal = fastData[key];
+
+    // Handle Null Values Form the Car
+    if (sensorVal == null) {
+      continue;
     }
 
-    const sensor = C.SENSORS[info_ind];
+    dataObjFast[key] = {
+      'val': sensorVal,
+      'time': formattedTime,
+    };
 
-    let value = data[i].toString(2) + data[i-1].toString(2); // little endian
-    value = processData(value, sensor);
-    dataObj[sensor.name] = {
-      'val': value,
-      'time': curTime - START_TIME,
-    }
+    dataRepo.create(sensorName, sensorVal, formattedTime, sessionID)
 
-    // Iteratior increment
-    i += sensor.bytes_length // increment with current data value length
-    info_ind += 1;
   }
-  
-  return dataObj;
-}
 
-// process byte data into float/int
-function processData(value, sensor){
-  // value -> the data in bytes
-  // type -> type of data, int or float
-  let type = sensor.type;
-  let bias = sensor.bias;
+  // needs to add slow data here
 
-  if (type == "int"){
-    // process to int
-    return parseInt(value, 2);
-  } else if (type == "float"){
-    // process to float
-    return parseInt(value, 2)*scale + bias;
-  }
-  // default return 0
-  return 0
+  return {'fast':dataObjFast, 'slow': dataObjSlow};
 }
 
 
 
 // ****************************** DYNAMODB CODE ***********************************
-
-// // Write data to DynamoDB, faked right now
-// setInterval(() => {
-//   var dynamoDBJson = {};
-//   // set the necessary headers for the response
-//   sensors.forEach(sensor => { dynamoDBJson[sensor] = {L : []}; });
-//   var today = new Date();
-//   var dd = String(today.getDate()).padStart(2, '0');
-//   var mm = String(today.getMonth() + 1).padStart(2, '0'); //January is 0!
-//   var yyyy = today.getFullYear();
-//   today = yyyy + ',' + mm + ',' + dd;
-//   dynamoDBJson["Date"] = { S: today };
-//   // console.log(`len: ${Object.keys(sensorDataQueue).length}`);
-//   const curTime = Date.now() / 1000;
-//   for (var i = 0; i < sensors.length; i++) {
-//     // pop data from sensorDataQueue and add to dynamoDBJson if time is before curTime
-//     while (sensorDataQueue[sensors[i]].length > 1 && Number(sensorDataQueue[sensors[i]][0].L[0].S) < curTime - origin) {
-//       dynamoDBJson[sensors[i]].L.push(sensorDataQueue[sensors[i]].shift());
-//       sensorDataQueue[sensors[i]].shift();
-//     }
-//   }
-
-//   dynamoDBJson["id"] = { S: "123456" };
-//   dynamoDBJson["Session Name"] = { S: "Test Session" };
-
-//   console.log(`SEND TO DYNAMO ${util.inspect(dynamoDBJson, {showHidden: false, depth: null, colors: true})}`);
-// }, 1 * 1000)
-
-// function getSmoothNumber(n) {
-//   const scale = 5;
-//   let difference = Math.floor(Math.random() * scale) - Math.floor(Math.random() * scale);
-//   if (n + difference < 0) {
-//     difference = scale * 2;
-//   }
-//   if (n + difference > 100) {
-//     difference = - scale * 2;
-//   }
-//   return n + difference;
-// }
-
-
-// dynamoDBHelper.sendDataToDynamoDB(temp);
