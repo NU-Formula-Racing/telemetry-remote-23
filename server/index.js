@@ -275,8 +275,6 @@ function readDataFromPort(socket, dataRepo, sessionID) {
 
   parser.on('data', function(data){
 
-    let dataObj = {};
-
     // Attempt to parse the data into JSON format first
     try{
       let jsonObj = JSON.parse(data);
@@ -292,9 +290,6 @@ function readDataFromPort(socket, dataRepo, sessionID) {
     } catch (e) {
       console.log("Error parsing data: ", e);
     }
-
-    
-
   })
 }
 
@@ -310,7 +305,6 @@ function emitData(data, socket) {
 }
 
 // dataJsonObj (dictionary) -> socketDataType
-// TODO: need to get time from the car instead of using local system current time
 function processData(jsonObj, dataRepo, sessionID){
 
   let dataObjFast = {};

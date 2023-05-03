@@ -40,6 +40,7 @@ const parseName = (str) => {
 
 function AutoLineChart({ color, titles, scale }) {
   const [sensorController] = useSensorController();
+  // data received is to update chart every time new data is received
   const { sensorData, dataReceived } = sensorController;
   const sensorNames = Object.keys(sensorData);
   const [description, setDescription] = useState("undefined");

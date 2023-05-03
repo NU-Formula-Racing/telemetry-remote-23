@@ -66,12 +66,6 @@ function createNewSessionItem(availableSensors) {
 // dataObj: maps sensor data to list of data
 // list of data: array of dict with keys [time, val]
 function updateSessionItem(dataObj) {
-    // TODO: add intervals for this
-    // FIXME: need to update dynamoDB once for every sensor every time we send update
-    // so need to write to DB at least eight times per data packet
-    // need to add delay, which means need queue from the data stream side
-    // too expensive to read everytime before writing. 
-    // need to change database schema or will be very slow 
 
     // for every sensor in dataObj append to item in dynamoDB
     for (let sensorName in Object.keys(dataObj)) {
@@ -105,8 +99,6 @@ function updateSessionItem(dataObj) {
 // Helper function to process data to be ready for DynamoDB
 function processSensorData(dictData){
     let processedData = {};
-    // TODO: need to validate this
-    // process dictData to DynamoDB to json
     for (let key in dictData){
         let sensorData = dictData[key];
         let sensorDataList = [];

@@ -1,10 +1,11 @@
 // TODO:
 // 5.5 floor charts in numnbers to 100 max
 // 6. add snack bar support for errors, socket events, alerts for data
-// 6.5 add tutorial on the settings and side nav
-// 7. write batch file to launch both
+// 7. add button on client to restart server (now default to mannualy restarting server)
 // MINOR TODO:
 // On scroll, bounces to index 0, but on second scroll we good
+// weird scale after on changing tabs
+// undefined when panning too far to the left
 
 import { useEffect } from "react";
 

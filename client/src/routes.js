@@ -38,7 +38,7 @@ Coded by www.creative-tim.com
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
-import Notifications from "layouts/notifications";
+// import Notifications from "layouts/notifications";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -54,28 +54,36 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "dashboard",
-    key: "dashboard",
+    name: "fast sensors",
+    key: "fast_sensors",
     icon: <Icon fontSize="small">dashboard</Icon>,
-    route: "/dashboard",
-    component: <Dashboard />,
+    route: "/fast_sensors", // if you change this also change in handleSelect in the table layout component
+    component: (
+      <Dashboard
+        sensorGroups={[
+          [0, 1, 2, 3],
+          [8, 9],
+        ]}
+      />
+    ),
   },
-  // {
-  //   type: "collapse",
-  //   name: "Powertrain",
-  //   key: "powertrain",
-  //   icon: <Icon fontSize="small">table_view</Icon>,
-  //   route: "/powertrain",
-  //   component: <Dashboard />,
-  // },
   {
     type: "collapse",
-    name: "Notifications",
-    key: "notifications",
-    icon: <Icon fontSize="small">notifications</Icon>,
-    route: "/notifications",
-    component: <Notifications />,
+    name: "slow sensors",
+    key: "slow_sensors",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/slow_sensors",
+    component: <Dashboard sensorGroups={[[4, 5, 6, 7]]} />,
   },
+  // this page is for demoing how to use notifications on the client side
+  // {
+  //   type: "collapse",
+  //   name: "Notifications",
+  //   key: "notifications",
+  //   icon: <Icon fontSize="small">notifications</Icon>,
+  //   route: "/notifications",
+  //   component: <Notifications />,
+  // },
 ];
 
 export default routes;
