@@ -35,74 +35,114 @@ const testing = require('./testing.js');
 // console.log(SerialPort.list());
 
 // configure and start serial port
-var laptopPort = null
+var laptopPort = null;
+var parser = null;
+var connectedOnce = false;
 
-if (!C.IS_TESTING){
+// reconnect variables
+var reconneting = null;
 
-  laptopPort = new SerialPort({
-    path: '/dev/tty.usbmodem115442501',
-    baudRate: 9600,
-    }, function (err) { 
-      if (err) {
-        return console.log('SerialPort Error on create: ', err.message)
-      } else {
-        return console.log('SerialPort created successfully')
-      }
-  });
+async function connectPort(){
+  // Find the port that is currently open
+  var portList = await SerialPort.list()
+  var portPath = null;
   
-  const ports = DarwinBinding.list()
-  
-  laptopPort.on('open', function () {
-    console.log('Port opened on ' + laptopPort.path);
-  })
-  
-  const parser = laptopPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+  for (var i = 0; i < portList.length; i++){
 
+    // log the individual info for each port
 
-// Handle port disconnects
-laptopPort.on('close', function(err){
-
-  if (err.disconnected) {
-    console.log('Port disconnected');
-
-    // Attempt to reconnect
-    while(true){
-
-      console.log("Platform binding")
-      console.log(SerialPort.binding)
-      console.log('List')
-      console.log(SerialPort.list())
-
-      try{
-        laptopPort = new SerialPort({
-          path: '/dev/tty.usbmodem115442501',
-          baudRate: 9600,
-          }, function (err) { 
-            if (err) {
-              return console.log('SerialPort Error on create: ', err.message)
-            } else {
-              return console.log('SerialPort created successfully')
-            }
-        });
-      } catch(err) {
-        console.log('SerialPort Error on Reconnect: ', err.message)
-      } finally {
-        console.log('SerialPort Reconnect Attempted')
-      }
-
-      console.log(laptopPort.isOpen)
-
-      if (laptopPort.isOpen) {
-        console.log('Port opened on ' + laptopPort.path);
-        break;
-      }
+    if (portList[i].manufacturer === 'Teensyduino' && 
+          portList[i].productId === '0483' && 
+          portList[i].serialNumber === '11544250'){
+      console.log("[Startup 1/2] On Start Up: Found port")
+      portPath = portList[i].path;
+      break;
     }
   }
 
-})
+  if (portPath === null){
+    console.log("[Fail] No port found... First connect -> Restart prcoess, Reconnect -> Reconnect Teensy")
+    return
+  }
 
+  await new Promise((resolve) => {
+    laptopPort = new SerialPort({
+      path: portPath,
+      baudRate: 9600,
+      }, async function (err) { 
+        if (err) {
+          console.log('[Fail] SerialPort Error on create: ', err.message)
+          resolve("failed");
+        } else {
+          console.log('[Startup Check] SerialPort created successfully')
+        }
+    });
+    resolve();
+  });
+
+  await new Promise((resolve) => {
+    laptopPort.on('open', function () {
+      console.log('[Startup 2/2] Port opened on ' + laptopPort.path);
+      connectedOnce = true;
+      resolve();
+    })
+  });
+
+  await new Promise((resolve) => {
+    parser = laptopPort.pipe(new ReadlineParser({ delimiter: '\r\n' }));
+    resolve();
+  });
+
+  // Now return promise
+  return new Promise((resolve, reject) => {
+    resolve("success");
+  });
 }
 
+
+// Async Function for start up
+async function startUp(){
+
+  // Some space for consolelog
+  console.log();
+  console.log("***************** STARTING UP *****************");
+
+  if (!C.IS_TESTING){
+
+    // Handle port disconnects
+    // NOTE: Connect port is an async function made to connect port
+    connectPort().then((message) => {
+
+      if (message === "failed"){
+        return;
+      }
+
+      console.log("*** PORT CONNECTED ***");
+
+      laptopPort.on('close', function(err){
+        console.log('[Disconnected] Port closed');
+        
+        // Try to reconnect every 3 seconds
+        reconnecting = setInterval(function(){
+          console.log('[Reconnecting] Trying to reconnect...');
+
+          // check if port has been reconnected
+          connectPort().then((message) => {
+            // Check if port has been reconnected
+            if (message === "success"){
+              console.log("*** PORT RECONNECTED ***");
+              clearInterval(reconnecting);
+            }
+          });
+        }, 3000);
+
+      });
+    });
+  }
+}
+
+// Start up FOR THE FIRST TIME <------
+startUp();
 
 // configure and start node.js server
 console.log('Starting express server...')
@@ -277,7 +317,13 @@ function readDataFromPort(socket, dataRepo, sessionID) {
 
     // Attempt to parse the data into JSON format first
     try{
+
+      console.log(data);
+
       let jsonObj = JSON.parse(data);
+
+      console.log(jsonObj);
+
       let processedData = processData(jsonObj, dataRepo, sessionID);
       let fastData = processedData.fast;
 
@@ -288,7 +334,7 @@ function readDataFromPort(socket, dataRepo, sessionID) {
 
       // now send data to client on sendSensorData event
     } catch (e) {
-      console.log("Error parsing data: ", e);
+      // console.log("Error parsing data: ", e); // mute the error for now
     }
   })
 }

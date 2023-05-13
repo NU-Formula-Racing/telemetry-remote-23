@@ -12,14 +12,16 @@ while True:
   # Checks if a new line is available from serialport; halts until there is one
   # It then decodes the ASCII-encoding into a String and removes the newline characters
   data = port.readline().decode("ascii").strip('\n\r')
-  print(port.readline().decode("ascii"))
+  # print(port.readline().decode("ascii"))
   
-  # try:
-  #   # Parse into JSON
-  #   j = json.loads(data)
+  try:
+    # Parse into JSON
+    j = json.loads(data)
+    j = json.dumps(j, indent=4)
     
-  #   # Display line (containing the full JSON) and a single JSON query
-  #   print(data)
-  #   print(j["fast"]["fl_wheel_speed"])
-  # except:
-  #   print("TESTING ERROR")
+    
+    # Display line (containing the full JSON) and a single JSON query
+    print(j)
+    # print(j["fast"]["fl_wheel_speed"])
+  except:
+    print("TESTING ERROR")
