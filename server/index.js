@@ -39,6 +39,10 @@ var laptopPort = null;
 var parser = null;
 var connectedOnce = false;
 
+var socketGlobal = null;
+var dataRepoGlobal = null;
+var session_id_global = null;
+
 // reconnect variables
 var reconneting = null;
 
@@ -99,6 +103,28 @@ async function connectPort(){
   });
 }
 
+function onCloseHandle(){
+  laptopPort.on('close', function(err){
+    console.log('[Disconnected] Port closed');
+    
+    // Try to reconnect every 3 seconds
+    reconnecting = setInterval(function(){
+      console.log('[Reconnecting] Trying to reconnect...');
+
+      // check if port has been reconnected
+      connectPort().then((message) => {
+        // Check if port has been reconnected
+        if (message === "success"){
+          console.log("*** PORT RECONNECTED ***");
+          readDataFromPort(socketGlobal, dataRepoGlobal, session_id_global);
+          onCloseHandle();
+          clearInterval(reconnecting);
+        }
+      });
+    }, 3000);
+  });
+}
+
 
 // Async Function for start up
 async function startUp(){
@@ -119,24 +145,7 @@ async function startUp(){
 
       console.log("*** PORT CONNECTED ***");
 
-      laptopPort.on('close', function(err){
-        console.log('[Disconnected] Port closed');
-        
-        // Try to reconnect every 3 seconds
-        reconnecting = setInterval(function(){
-          console.log('[Reconnecting] Trying to reconnect...');
-
-          // check if port has been reconnected
-          connectPort().then((message) => {
-            // Check if port has been reconnected
-            if (message === "success"){
-              console.log("*** PORT RECONNECTED ***");
-              clearInterval(reconnecting);
-            }
-          });
-        }, 3000);
-
-      });
+      onCloseHandle();
     });
   }
 }
@@ -220,6 +229,9 @@ sessionRepo.createTable()
           )
         } else {
           // read data from serial port and send to client
+          socketGlobal = socket;
+          dataRepoGlobal = dataRepo;
+          session_id_global = session_id;
           readDataFromPort(socket, dataRepo, session_id);
         }
       }
@@ -313,6 +325,8 @@ sessionRepo.createTable()
 
 function readDataFromPort(socket, dataRepo, sessionID) {
 
+  console.log("[PARSER] Parser On")
+
   parser.on('data', function(data){
 
     // Attempt to parse the data into JSON format first
@@ -322,15 +336,13 @@ function readDataFromPort(socket, dataRepo, sessionID) {
 
       let jsonObj = JSON.parse(data);
 
-      console.log(jsonObj);
+      // console.log(jsonObj);
 
       let processedData = processData(jsonObj, dataRepo, sessionID);
-      let fastData = processedData.fast;
 
-      // console.log(jsonObj);
-      console.log(fastData);
+      // console.log(processedData);
 
-      emitData(fastData, socket); // emit fast data to client
+      emitData(processedData, socket); // emit data to client
 
       // now send data to client on sendSensorData event
     } catch (e) {
@@ -353,8 +365,7 @@ function emitData(data, socket) {
 // dataJsonObj (dictionary) -> socketDataType
 function processData(jsonObj, dataRepo, sessionID){
 
-  let dataObjFast = {};
-  let dataObjSlow = jsonObj.slow;
+  const formattedData = {};
 
   const now = new Date(); // Get current date and time
   const cstOffset = 0 * 60 * 60 * 1000; // Offset in milliseconds for CST time zone
@@ -366,21 +377,19 @@ function processData(jsonObj, dataRepo, sessionID){
 
   const formattedTime = `${hours}:${minutes}:${seconds}.${milliseconds}`;
 
-  const fastData= jsonObj['fast'];
-
-  // Process Fast data first
+  // Process Data first (no longer distinguish data for fast and slow)
   for (var i = 0; i < C.SENSORS.length; i++) {
 
     let key = C.SENSOR_NAMES[i];
     let sensorName = key;
-    let sensorVal = fastData[key];
+    let sensorVal = jsonObj[key];
 
     // Handle Null Values Form the Car
     if (sensorVal == null) {
       continue;
     }
 
-    dataObjFast[key] = {
+    formattedData[key] = {
       'val': sensorVal,
       'time': formattedTime,
     };
@@ -390,8 +399,7 @@ function processData(jsonObj, dataRepo, sessionID){
   }
 
   // needs to add slow data here
-
-  return {'fast':dataObjFast, 'slow': dataObjSlow};
+  return formattedData;
 }
 
 

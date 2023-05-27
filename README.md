@@ -1,5 +1,9 @@
 # Telemetry Remote NFR23
 
+## How to activate server and client
+`npm start`
+will start the server and client concurrently
+
 ## Getting Started
 
 execute the `initApp.bat` file from file explorer. Close the command prompt windows after completion.
