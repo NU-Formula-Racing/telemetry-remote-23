@@ -263,7 +263,7 @@ function Configurator() {
         </MDBox>
         <MDBox display="flex" justifyContent="flex-start" alignItems="center" gap={1}>
           <MDTypography variant="h6">4.</MDTypography>
-          <MDTypography variant="body2">Relaunch the app entirely.</MDTypography>
+          <MDTypography variant="body2">kill and relaunch the app entirely.</MDTypography>
         </MDBox>
         <MDBox display="flex" justifyContent="flex-start" alignItems="center" gap={1}>
           <MDTypography variant="h6">5.</MDTypography>
