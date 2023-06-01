@@ -28,6 +28,7 @@ const fl_brake_temperature = new Sensor("fl_brake_temperature", "float", "C", 20
 const fr_brake_temperature = new Sensor("fr_brake_temperature", "float", "C", 200, 150);
 const bl_brake_temperature = new Sensor("bl_brake_temperature", "float", "C", 200, 150);
 const br_brake_temperature = new Sensor("br_brake_temperature", "float", "C", 200, 150);
+
 const front_brake_pressure = new Sensor("front_brake_pressure", "int", "psi", 200, 150);
 const rear_brake_pressure = new Sensor("rear_brake_pressure", "int", "psi", 200, 150);
 
@@ -46,6 +47,7 @@ const motor_temperature = new Sensor("motor_temperature", "float", "C", 120, 90)
 const accel_x = new Sensor("accel_x", "float", "G", 20, 15);
 const accel_y = new Sensor("accel_y", "float", "G", 20, 15);
 const accel_z = new Sensor("accel_z", "float", "G", 20, 15);
+
 const gyro_x = new Sensor("gyro_x", "float", "rad/s", 3, 2); // check
 const gyro_y = new Sensor("gyro_y", "float", "rad/s", 3, 2); // check
 const gyro_z = new Sensor("gyro_z", "float", "rad/s", 3, 2); // check
@@ -74,18 +76,18 @@ const inverter_temperature = new Sensor("inverter_temperature", "float", "C", 12
 // ];
 
 const SENSORS = [
-    fl_wheel_speed, fr_wheel_speed, bl_wheel_speed, br_wheel_speed,
-    rpm,
-    fl_brake_temperature, fr_brake_temperature, bl_brake_temperature, br_brake_temperature,
-    front_brake_pressure, rear_brake_pressure,
-    hv_battery_voltage, hv_battery_temperature, hv_battery_current, hv_max_discharge_current, hv_max_regen_current,
-    motor_temperature,
-    accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z,
-    latitude, longitude,
-    tractile_system_status,
-    rtc,
-    accel_percentage, brake_percentage,
-    coolant_temperature, ambient_temperature
+    fl_wheel_speed, fr_wheel_speed, bl_wheel_speed, br_wheel_speed, // 0 1 2 3 [done]
+    rpm, // 4 [done]
+    front_brake_pressure, rear_brake_pressure, // 5 6 [done]
+    hv_battery_voltage, hv_battery_temperature, hv_battery_current, hv_max_discharge_current, hv_max_regen_current, // 7 8 9 10 11 [done]
+    motor_temperature, // 12 [done]
+    accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, // 13 14 15 16 17 18 [done]
+    latitude, longitude, // 19 20 [done]
+    tractile_system_status, // 21 [done]
+    rtc,    // 22
+    accel_percentage, brake_percentage, // 23 24
+    fl_brake_temperature, fr_brake_temperature, bl_brake_temperature, br_brake_temperature, // some of slow sensors, 25 26 27 28 [done]
+    coolant_temperature, ambient_temperature, inverter_temperature, coolant_flow, hv_stat_of_charge // some of slow sensors, 29 30 31 32 33 [done]
 ];
 
 
