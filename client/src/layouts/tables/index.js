@@ -67,8 +67,7 @@ function Tables() {
 
   const navigate = useNavigate();
   const handleSelect = (id) => {
-    console.log(); // FIXME: state from row componenets will not update
-    // FIXME: need error response to ask user to restart again
+    // FIXME: state from row componenets will not update
     if (socket && socket.connected) {
       handleSetStatus(Status.FETCHING);
       console.log("tables: send initializeSession");
@@ -80,7 +79,7 @@ function Tables() {
         }
         handleSetStatus(Status.LIVE);
         handleSetSensorMetaData(res.sensorMetaData);
-        navigate("/dashboard");
+        navigate("/fast_sensors"); // default page afterwards, change it to highest priority sensors
       });
     } else {
       console.log("tables: socket not connected");
@@ -119,7 +118,6 @@ function Tables() {
     disableSelect = false,
     disableDelete = false,
   }) {
-    // TODO: (extra) add snackbar response for server events
     return {
       session: <Session name={argName} id={argId} />,
       lastUpdated: <Timestamp date={argDate} time={argTime} />,

@@ -42,7 +42,6 @@ function reducer(state, action) {
         sensorData: {
           ...state.sensorData,
           [name]: [
-            // FIXME: preprocess everything on the server
             // x axis is time
             [...state.sensorData[name][0], data.time],
             // y axis is value

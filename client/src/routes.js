@@ -38,7 +38,7 @@ Coded by www.creative-tim.com
 // Material Dashboard 2 React layouts
 import Dashboard from "layouts/dashboard";
 import Tables from "layouts/tables";
-import Notifications from "layouts/notifications";
+// import Notifications from "layouts/notifications";
 
 // @mui icons
 import Icon from "@mui/material/Icon";
@@ -54,28 +54,64 @@ const routes = [
   },
   {
     type: "collapse",
-    name: "dashboard",
-    key: "dashboard",
+    name: "Wheel, Break, Motor Temp.", //name of page
+    key: "wbm", // key, unique too
     icon: <Icon fontSize="small">dashboard</Icon>,
-    route: "/dashboard",
-    component: <Dashboard />,
+    route: "/wbm", // if you change this also change in handleSelect in the table layout component
+    component: (
+      <Dashboard
+        sensorGroups={[
+          [0, 1, 2, 3],
+          [4],
+          [25, 26, 27, 28],
+          [5, 6],
+          [12],
+          [23, 24]
+        ]}
+      />
+    ),
   },
-  // {
-  //   type: "collapse",
-  //   name: "Powertrain",
-  //   key: "powertrain",
-  //   icon: <Icon fontSize="small">table_view</Icon>,
-  //   route: "/powertrain",
-  //   component: <Dashboard />,
-  // },
   {
     type: "collapse",
-    name: "Notifications",
-    key: "notifications",
-    icon: <Icon fontSize="small">notifications</Icon>,
-    route: "/notifications",
-    component: <Notifications />,
+    name: "Accel and Gyro", //name of page
+    key: "accel and gyro",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/accel_gyro",
+    component: <Dashboard sensorGroups={[[13, 14, 15], [16, 17, 18]]} />,
   },
+  {
+    type: "collapse",
+    name: "Battery Related [Fast]", //name of page
+    key: "battery_realted",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/battery_related",
+    component: <Dashboard sensorGroups={[[7], [8], [9, 10, 11]]} />,
+  },
+  {
+    type: "collapse",
+    name: "Misc [Fast]", //name of page
+    key: "misc_fast_sensors",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/misc_fast_sensors",
+    component: <Dashboard sensorGroups={[[19, 20], [21]]} />,
+  },
+  {
+    type: "collapse",
+    name: "Misc [Slow]", //name of page
+    key: "misc_slow_sensors",
+    icon: <Icon fontSize="small">dashboard</Icon>,
+    route: "/misc_slow_sensors",
+    component: <Dashboard sensorGroups={[[29, 30, 31], [32], [33]]} />,
+  },
+  // this page is for demoing how to use notifications on the client side
+  // {
+  //   type: "collapse",
+  //   name: "Notifications",
+  //   key: "notifications",
+  //   icon: <Icon fontSize="small">notifications</Icon>,
+  //   route: "/notifications",
+  //   component: <Notifications />,
+  // },
 ];
 
 export default routes;

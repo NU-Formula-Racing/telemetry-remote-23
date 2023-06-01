@@ -5,10 +5,7 @@ import { useMaterialUIController } from "context/MaterialUIProvider";
 function configs(titles) {
   const [muiController] = useMaterialUIController();
   const { darkMode } = muiController;
-  // FIXME: figure how to change data colors based on dataset
-
   const darkModeColors = [
-    // 03a9f4,
     "rgba(179, 136, 255, 1)",
     "rgba(130, 177, 255, 1)",
     "rgba(3, 218, 198, 1)",

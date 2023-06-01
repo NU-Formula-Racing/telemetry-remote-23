@@ -1,40 +1,96 @@
 //****************************** CONFIG ***************************************
 
 const DB_PATH = './server/db/database.sqlite3'
-const IS_TESTING = true;
+const IS_TESTING = false; // If we are in testing mode currently or not
 const DATA_PERIOD = 0.2; // seconds
 
 
 //****************************** SENSORS ***************************************
 class Sensor {
-    constructor(name, type, bias, scale, bytes_length, unit, max, warning) {
+    constructor(name, type, unit, max, warning) {
         this.name = name;
         this.type = type;
-        this.bias = bias;
-        this.scale = scale;
-        this.bytes_length = bytes_length;
         this.unit = unit;
         this.max = max;
         this.warning = warning;
     }
 }
 
-const FL_WEHEEL_SPEED = new Sensor("FL_WHEEL_SPEED", "float", 0, 0.1, 2, "mph", 200, 150);
-const FR_WHEEL_SPEED = new Sensor("FR_WHEEL_SPEED", "float", 1, 0.1, 2, "mph", 200, 150);
-const BL_WHEEL_SPEED = new Sensor("BL_WHEEL_SPEED", "float", 0, 0.1, 2, "mph", 200, 150);
-const BR_WHEEL_SPEED = new Sensor("BR_WHEEL_SPEED", "float", 1, 0.1, 2, "mph", 200, 150);
-const FL_BRAKE_TEMP = new Sensor("FL_BRAKE_TEMP", "float", 0, 0.1, 2, "F", 200, 150);
-const FR_BRAKE_TEMP = new Sensor("FR_BRAKE_TEMP", "float", 1, 0.1, 2, "F", 200, 150);
-const BL_BRAKE_TEMP = new Sensor("BL_BRAKE_TEMP", "float", 0, 0.1, 2, "F", 200, 150);
-const BR_BRAKE_TEMP = new Sensor("BR_BRAKE_TEMP", "float", 1, 0.1, 2, "F", 200, 150);
-const F_BRAKE_PRESSURE = new Sensor("F_BRAKE_PRESSURE", "int", 0, 1, 2, "psi", 200, 150);
-const R_BRAKE_PRESSURE = new Sensor("R_BRAKE_PRESSURE", "int", 1, 1, 2, "psi", 200, 150);
+// Wheel Related
+const fl_wheel_speed = new Sensor("fl_wheel_speed", "float", "mph", 200, 150);
+const fr_wheel_speed = new Sensor("fr_wheel_speed", "float", "mph", 200, 150);
+const bl_wheel_speed = new Sensor("bl_wheel_speed", "float", "mph", 200, 150);
+const br_wheel_speed = new Sensor("br_wheel_speed", "float", "mph", 200, 150);
+const rpm = new Sensor("rpm", "float", "rpm", 10000, 8000);
+
+// Brake Related
+const fl_brake_temperature = new Sensor("fl_brake_temperature", "float", "C", 200, 150);
+const fr_brake_temperature = new Sensor("fr_brake_temperature", "float", "C", 200, 150);
+const bl_brake_temperature = new Sensor("bl_brake_temperature", "float", "C", 200, 150);
+const br_brake_temperature = new Sensor("br_brake_temperature", "float", "C", 200, 150);
+
+const front_brake_pressure = new Sensor("front_brake_pressure", "int", "psi", 200, 150);
+const rear_brake_pressure = new Sensor("rear_brake_pressure", "int", "psi", 200, 150);
+
+// Battery Related
+const hv_battery_voltage = new Sensor("hv_battery_voltage", "float", "V", 60, 40);
+const hv_battery_temperature = new Sensor("hv_battery_temperature", "float", "C", 50, 40);
+const hv_battery_current = new Sensor("hv_battery_current", "float", "A", 600, 400);
+const hv_max_discharge_current = new Sensor("hv_max_discharge_current", "float", "A", 800, 600);
+const hv_max_regen_current = new Sensor("hv_max_regen_current", "float", "A", 400, 300);
+const hv_stat_of_charge = new Sensor("hv_stat_of_charge", "float", "%", 100, 80);
+
+// Motor Related
+const motor_temperature = new Sensor("motor_temperature", "float", "C", 120, 90);
+
+// Misc
+const accel_x = new Sensor("accel_x", "float", "G", 20, 15);
+const accel_y = new Sensor("accel_y", "float", "G", 20, 15);
+const accel_z = new Sensor("accel_z", "float", "G", 20, 15);
+
+const gyro_x = new Sensor("gyro_x", "float", "rad/s", 3, 2); // check
+const gyro_y = new Sensor("gyro_y", "float", "rad/s", 3, 2); // check
+const gyro_z = new Sensor("gyro_z", "float", "rad/s", 3, 2); // check
+const latitude = new Sensor("latitude", "float", "deg", 180, -180); // check
+const longitude = new Sensor("longitude", "float", "deg", 180, -180); // check
+const tractile_system_status = new Sensor("tractile_system_status", "bool", "", 1, 0); // enum?
+const coolant_flow = new Sensor("coolant_flow", "float", "L/min", 10, 5); // check
+
+// Real Time Clock
+const rtc = new Sensor("rtc", "int", "sec", 86400, 0);
+
+// Mechanical Percentages
+const accel_percentage = new Sensor("accel_percentage", "float", "%", 100, 80); // check
+const brake_percentage = new Sensor("brake_percentage", "float", "%", 100, 80); // check
+
+// Temperatures
+const coolant_temperature = new Sensor("coolant_temperature", "float", "C", 120, 90);
+const ambient_temperature = new Sensor("ambient_temperature", "float", "C", 50, 40);
+const inverter_temperature = new Sensor("inverter_temperature", "float", "C", 120, 90);
+
+
+// const SENSORS = [
+//     fl_wheel_speed, fr_wheel_speed, bl_wheel_speed, br_wheel_speed,
+//     fl_brake_temperature, fr_brake_temperature, bl_brake_temperature, br_brake_temperature,
+//     front_brake_pressure, rear_brake_pressure, 
+// ];
 
 const SENSORS = [
-    FL_WEHEEL_SPEED, FR_WHEEL_SPEED, BL_WHEEL_SPEED, BR_WHEEL_SPEED,
-    FL_BRAKE_TEMP, FR_BRAKE_TEMP, BL_BRAKE_TEMP, BR_BRAKE_TEMP,
-    F_BRAKE_PRESSURE, R_BRAKE_PRESSURE
-]
+    fl_wheel_speed, fr_wheel_speed, bl_wheel_speed, br_wheel_speed, // 0 1 2 3 [done]
+    rpm, // 4 [done]
+    front_brake_pressure, rear_brake_pressure, // 5 6 [done]
+    hv_battery_voltage, hv_battery_temperature, hv_battery_current, hv_max_discharge_current, hv_max_regen_current, // 7 8 9 10 11 [done]
+    motor_temperature, // 12 [done]
+    accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z, // 13 14 15 16 17 18 [done]
+    latitude, longitude, // 19 20 [done]
+    tractile_system_status, // 21 [done]
+    rtc,    // 22
+    accel_percentage, brake_percentage, // 23 24
+    fl_brake_temperature, fr_brake_temperature, bl_brake_temperature, br_brake_temperature, // some of slow sensors, 25 26 27 28 [done]
+    coolant_temperature, ambient_temperature, inverter_temperature, coolant_flow, hv_stat_of_charge // some of slow sensors, 29 30 31 32 33 [done]
+];
+
+
 
 const NUM_OF_SENSORS = SENSORS.length;
 const SENSOR_BYTE_LENGTH = NUM_OF_SENSORS*2;
