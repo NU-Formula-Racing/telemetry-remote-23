@@ -38,6 +38,13 @@ Need to reslect the same session after. <br>
 
 ![Alt text](./screenshot.png "Screenshot")
 
+### Serial Disconneccts/Usb is out of the laptop
+Data will continue to send to the server, but in order for the data to be displayed on the client, please following the below steps:
+
+1. Refresh the page
+2. Go to "Sessions" tab
+3. Select the session you were previously connected to, or start a new one
+
 ### For Future Developers
 ## Stack
 - backend: nodeJS, express, socket-io
