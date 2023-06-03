@@ -233,6 +233,8 @@ sessionRepo.createTable()
           dataRepoGlobal = dataRepo;
           session_id_global = session_id;
           readDataFromPort(socket, dataRepo, session_id);
+
+          console.log("Data is sending....");
         }
       }
 
@@ -332,8 +334,6 @@ function readDataFromPort(socket, dataRepo, sessionID) {
     // Attempt to parse the data into JSON format first
     try{
 
-      console.log(data);
-
       let jsonObj = JSON.parse(data);
 
       // console.log(jsonObj);
@@ -357,6 +357,7 @@ function readDataFromPort(socket, dataRepo, sessionID) {
 function emitData(data, socket) {
 
   // dynamoDBHelper.sendDataToDynamoDB(dataObj);
+  // console.log(data);
 
   // send data to client on sendSensorData event
   socket.emit('sendSensorData', data);
@@ -369,7 +370,9 @@ function processData(jsonObj, dataRepo, sessionID){
 
   const now = new Date(); // Get current date and time
   const cstOffset = 0 * 60 * 60 * 1000; // Offset in milliseconds for CST time zone
-  const cstTime = new Date(now.getTime() + cstOffset); // insert timezone adjusted unix timestamp here
+  var currentTime = new Date(0); // use rtc time, from 
+  currentTime = currentTime.setUTCSeconds(jsonObj['rtc']);
+  const cstTime = new Date(currentTime + cstOffset); // insert timezone adjusted unix timestamp here
   const hours = cstTime.getHours().toString().padStart(2, '0');
   const minutes = cstTime.getMinutes().toString().padStart(2, '0');
   const seconds = cstTime.getSeconds().toString().padStart(2, '0');
@@ -385,9 +388,13 @@ function processData(jsonObj, dataRepo, sessionID){
     let sensorVal = jsonObj[key];
 
     // Handle Null Values Form the Car
+    // NOTE: This may have issues with the graph if the scale is weird
     if (sensorVal == null) {
+      // sensorVal = 0;// default to 0 right now for null values to ensure the graph still works
       continue;
     }
+
+    sensorVal = parseFloat(sensorVal.toFixed(2));
 
     formattedData[key] = {
       'val': sensorVal,

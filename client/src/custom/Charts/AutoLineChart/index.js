@@ -31,8 +31,11 @@ import useEventListener from "@use-it/event-listener";
 ChartJS.register(zoomPlugin);
 
 const parseName = (str) => {
-  if (!str || str.indexOf("_") === -1) {
+  if (!str) {
     return "undefined";
+  }
+  if (str.indexOf("_") === -1){
+    return str;
   }
   const firstUnderscore = str.indexOf("_");
   return str.slice(firstUnderscore + 1);
