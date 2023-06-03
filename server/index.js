@@ -55,9 +55,17 @@ async function connectPort(){
 
     // log the individual info for each port
 
-    if (portList[i].manufacturer === 'Teensyduino' && 
-          portList[i].productId === '0483' && 
-          portList[i].serialNumber === '11544250'){
+    var check1 = portList[i].productId === '0483';
+    var check2 = portList[i].vendorId === '16c0';
+    var check3 = false;
+
+    if (portList[i].manufacturer == 'Teensyduino'){
+      check3 = true;
+    } else if (portList[i].manufacturer == 'Microsoft'){
+      check3 = portList[i].friendlyName && portList[i].friendlyName.includes('USB Serial Device');
+    }
+
+    if (check1 && check2 && check3){
       console.log("[Startup 1/2] On Start Up: Found port")
       portPath = portList[i].path;
       break;
