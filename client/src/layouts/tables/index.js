@@ -79,7 +79,7 @@ function Tables() {
         }
         handleSetStatus(Status.LIVE);
         handleSetSensorMetaData(res.sensorMetaData);
-        navigate("/fast_sensors"); // default page afterwards, change it to highest priority sensors
+        navigate("/battery_related"); // default page afterwards, change it to highest priority sensors
       });
     } else {
       console.log("tables: socket not connected");
