@@ -56,7 +56,7 @@ async function connectPort(){
     // log the individual info for each port
 
     var check1 = portList[i].productId && portList[i].productId === '0483';
-    var check2 = portList[i].vendorId && ortList[i].vendorId.toLowerCase() === '16c0';
+    var check2 = portList[i].vendorId && portList[i].vendorId.toLowerCase() === '16c0';
     var check3 = false;
 
     if (portList[i].manufacturer == 'Teensyduino'){
